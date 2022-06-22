@@ -15,6 +15,7 @@ public class PluginRequestResult
     {
         NotFound,
         SubscriptionExpired,
-        NotFoundOrSubscriptionExpired
+        NotFoundOrSubscriptionExpired,
+        VersionOutdated,
     }
 }

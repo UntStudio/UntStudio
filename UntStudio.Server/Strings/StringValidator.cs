@@ -1,4 +1,6 @@
-﻿namespace UntStudio.Server.Strings;
+﻿using System;
+
+namespace UntStudio.Server.Strings;
 
 public sealed class StringValidator : IStringValidator
 {

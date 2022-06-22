@@ -9,43 +9,42 @@ using UntStudio.Server.Models;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.PluginRequestResult;
 
-namespace UntStudio.Server.Controllers
+namespace UntStudio.Server.Controllers;
+
+public sealed class BootstrapperController : Controller
 {
-    public sealed class BootstrapperController : Controller
+    private readonly PluginsDatabaseContext database;
+
+    private readonly IConfiguration configuration;
+
+
+
+    public BootstrapperController(PluginsDatabaseContext database, IConfiguration configuration)
     {
-        private readonly PluginsDatabaseContext database;
+        this.database = database;
+        this.configuration = configuration;
+    }
 
-        private readonly IConfiguration configuration;
 
 
+    public IActionResult UnloadLoader(string key)
+    {
+        key.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(19)
+            .Return(out IStringValidator keyValidator);
 
-        public BootstrapperController(PluginsDatabaseContext database, IConfiguration configuration)
+        if (keyValidator.Failed)
         {
-            this.database = database;
-            this.configuration = configuration;
+            return BadRequest();
         }
 
-
-
-        public IActionResult UnloadLoader(string key)
+        if (this.database.Data.Any(p => p.Key.Equals(key) && p.NotExpired) == false)
         {
-            key.Rules()
-                .ContentNotNullOrWhiteSpace()
-                .ShouldBeEqualToCharactersLenght(19)
-                .Return(out IStringValidator keyValidator);
-
-            if (keyValidator.Failed)
-            {
-                return BadRequest();
-            }
-
-            if (this.database.Data.Any(p => p.Key.Equals(key) && p.NotExpired) == false)
-            {
-                return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.NotFoundOrSubscriptionExpired)));
-            }
-
-            string file = Path.Combine(this.configuration["PluginsLoader:Path"]);
-            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(file)));
+            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.NotFoundOrSubscriptionExpired)));
         }
+
+        string file = Path.Combine(this.configuration["PluginsLoader:Path"]);
+        return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(file)));
     }
 }

@@ -6,23 +6,27 @@ using System.IO;
 using System.Linq;
 using UntStudio.Server.Data;
 using UntStudio.Server.Models;
+using UntStudio.Server.Repositories;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.PluginRequestResult;
 
 namespace UntStudio.Server.Controllers;
 
-public class PluginsController : Controller
+public sealed class PluginsController : Controller
 {
     private readonly PluginsDatabaseContext database;
 
     private readonly IConfiguration configuration;
 
+    private readonly ILoaderHashesVerifierRepository loaderHashesVerifierRepository;
 
 
-    public PluginsController(PluginsDatabaseContext database, IConfiguration configuration)
+
+    public PluginsController(PluginsDatabaseContext database, IConfiguration configuration, ILoaderHashesVerifierRepository loaderHashesVerifierRepository)
     {
         this.database = database;
         this.configuration = configuration;
+        this.loaderHashesVerifierRepository = loaderHashesVerifierRepository;
     }
 
 
@@ -53,8 +57,13 @@ public class PluginsController : Controller
         return Ok(JsonConvert.SerializeObject(plugin));
     }
 
-    public IActionResult Unload(string key, string pluginName)
+    public IActionResult Unload(byte[] loaderBytes, string key, string pluginName)
     {
+        if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.VersionOutdated)));
+        }
+
         key.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(19)
