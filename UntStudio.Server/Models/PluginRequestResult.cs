@@ -1,20 +1,20 @@
-﻿namespace UntStudio.Server.Models
+﻿namespace UntStudio.Server.Models;
+
+public class PluginRequestResult
 {
-    public class PluginRequestResult
+    public PluginRequestResult(CodeResponse response)
     {
-        public PluginRequestResult(CodeResponse response)
-        {
-            Response = response;
-        }
+        Response = response;
+    }
 
 
 
-        public CodeResponse Response { get; set; }
+    public CodeResponse Response { get; set; }
 
-        public enum CodeResponse
-        {
-            NotFound,
-            SubscriptionExpired,
-        }
+    public enum CodeResponse
+    {
+        NotFound,
+        SubscriptionExpired,
+        NotFoundOrSubscriptionExpired
     }
 }

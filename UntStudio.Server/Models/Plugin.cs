@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace UntStudio.Server.Models
 {
@@ -32,6 +33,8 @@ namespace UntStudio.Server.Models
         public DateTime ExpirationTime { get; set; }
 
         public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
+
+        public bool NotExpired => Expired == false;
 
 
 
