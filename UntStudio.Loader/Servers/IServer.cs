@@ -2,5 +2,6 @@
 {
     internal interface IServer
     {
+        void SendRequest(string key, string pluginName);
     }
 }

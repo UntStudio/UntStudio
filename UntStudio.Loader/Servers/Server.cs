@@ -2,7 +2,7 @@
 {
     internal sealed class Server : IServer
     {
-        internal void SendRequest(string key, string pluginName)
+        public void SendRequest(string key, string pluginName)
         {
 
         }
