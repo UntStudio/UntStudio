@@ -1,8 +1,8 @@
 ﻿namespace UntStudio.Server.Models;
 
-public class PluginRequestResult
+public class RequestResult
 {
-    public PluginRequestResult(CodeResponse response)
+    public RequestResult(CodeResponse response)
     {
         Response = response;
     }
@@ -13,9 +13,9 @@ public class PluginRequestResult
 
     public enum CodeResponse
     {
+        VersionOutdated,
         NotFound,
         SubscriptionExpired,
         NotFoundOrSubscriptionExpired,
-        VersionOutdated,
     }
 }

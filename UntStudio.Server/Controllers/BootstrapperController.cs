@@ -7,7 +7,7 @@ using System.Linq;
 using UntStudio.Server.Data;
 using UntStudio.Server.Models;
 using UntStudio.Server.Strings;
-using static UntStudio.Server.Models.PluginRequestResult;
+using static UntStudio.Server.Models.RequestResult;
 
 namespace UntStudio.Server.Controllers;
 
@@ -32,7 +32,7 @@ public sealed class BootstrapperController : Controller
         key.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(19)
-            .Return(out IStringValidator keyValidator);
+            .Give(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {
@@ -41,7 +41,7 @@ public sealed class BootstrapperController : Controller
 
         if (this.database.Data.Any(p => p.Key.Equals(key) && p.NotExpired) == false)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.NotFoundOrSubscriptionExpired)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.NotFoundOrSubscriptionExpired)));
         }
 
         string file = Path.Combine(this.configuration["PluginsLoader:Path"]);

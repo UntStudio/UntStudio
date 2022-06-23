@@ -8,7 +8,7 @@ using UntStudio.Server.Data;
 using UntStudio.Server.Models;
 using UntStudio.Server.Repositories;
 using UntStudio.Server.Strings;
-using static UntStudio.Server.Models.PluginRequestResult;
+using static UntStudio.Server.Models.RequestResult;
 
 namespace UntStudio.Server.Controllers;
 
@@ -31,12 +31,19 @@ public sealed class PluginsController : Controller
 
 
 
-    public IActionResult GetPlugin(string key)
+    private const int KeyLength = 19;
+
+    public IActionResult GetPlugin(byte[] loaderBytes, string key)
     {
+        if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.VersionOutdated)));
+        }
+
         key.Rules()
             .ContentNotNullOrWhiteSpace()
-            .ShouldBeEqualToCharactersLenght(19)
-            .Return(out IStringValidator keyValidator);
+            .ShouldBeEqualToCharactersLenght(KeyLength)
+            .Give(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {
@@ -46,12 +53,12 @@ public sealed class PluginsController : Controller
         Plugin plugin = this.database.Data.FirstOrDefault(p => p.Key.Equals(key));
         if (plugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.NotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.NotFound)));
         }
 
         if (plugin.Expired)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.SubscriptionExpired)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.SubscriptionExpired)));
         }
 
         return Ok(JsonConvert.SerializeObject(plugin));
@@ -61,13 +68,13 @@ public sealed class PluginsController : Controller
     {
         if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.VersionOutdated)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.VersionOutdated)));
         }
 
         key.Rules()
             .ContentNotNullOrWhiteSpace()
-            .ShouldBeEqualToCharactersLenght(19)
-            .Return(out IStringValidator keyValidator);
+            .ShouldBeEqualToCharactersLenght(KeyLength)
+            .Give(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {
@@ -76,7 +83,7 @@ public sealed class PluginsController : Controller
 
         pluginName.Rules()
             .ContentNotNullOrWhiteSpace()
-            .Return(out IStringValidator pluginNameValidator);
+            .Give(out IStringValidator pluginNameValidator);
 
         if (pluginNameValidator.Failed)
         {
@@ -86,15 +93,15 @@ public sealed class PluginsController : Controller
         Plugin plugin = this.database.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(pluginName));
         if (plugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.NotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.NotFound)));
         }
 
         if (plugin.Expired)
         {
-            return Content(JsonConvert.SerializeObject(new PluginRequestResult(CodeResponse.SubscriptionExpired)));
+            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.SubscriptionExpired)));
         }
 
-        string file = Path.Combine(this.configuration["PluginsDirectory:Path"], pluginName + ".dll");
+        string file = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(pluginName, ".dll"));
         return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(file)));
     }
 }

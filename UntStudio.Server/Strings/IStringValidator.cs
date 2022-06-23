@@ -12,7 +12,7 @@ public interface IStringValidator : IValidator
 
     IStringValidator ContentNotNullOrWhiteSpace();
 
-    IStringValidator Return(out IStringValidator self);
+    IStringValidator Give(out IStringValidator self);
 
     IStringValidator ThrowIfFailed(Type type);
 
