@@ -32,7 +32,7 @@ public sealed class BootstrapperController : Controller
         key.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(19)
-            .Give(out IStringValidator keyValidator);
+            .Return(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {

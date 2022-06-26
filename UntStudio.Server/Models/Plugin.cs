@@ -1,61 +1,66 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text;
 
-namespace UntStudio.Server.Models
+namespace UntStudio.Server.Models;
+
+public class Plugin
 {
-    public class Plugin
+    public Plugin(string name, string key, string allowedAddresses, DateTime purchaseTime, DateTime expirationTime)
     {
-        public Plugin(string name, string key, string allowedAddresses, DateTime purchaseTime, DateTime expirationTime)
-        {
-            Name = name;
-            Key = key;
-            PurchaseTime = DateTime.ParseExact(purchaseTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-            ExpirationTime = DateTime.ParseExact(expirationTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-            AllowedAddresses = allowedAddresses;
-        }
+        Name = name;
+        Key = key;
+        PurchaseTime = DateTime.ParseExact(purchaseTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+        ExpirationTime = DateTime.ParseExact(expirationTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+        AllowedAddresses = allowedAddresses;
+    }
 
-        public Plugin(string name, string key, string allowedAddresses, DateTime expirationTime) 
-            : this(name, key, allowedAddresses, DateTime.Now, expirationTime)
-        {
-        }
+    public Plugin(string name, string key, string allowedAddresses, DateTime expirationTime) 
+        : this(name, key, allowedAddresses, DateTime.Now, expirationTime)
+    {
+    }
 
-        public Plugin()
-        {
-        }
+    public Plugin()
+    {
+    }
 
 
 
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        public string Name { get; set; }
+    [Required]
+    public string Name { get; set; }
 
-        [Required]
-        [StringLength(19, MinimumLength = 19)]
-        public string Key { get; set; }
+    [Required]
+    [StringLength(19, MinimumLength = 19)]
+    public string Key { get; set; }
 
-        public string AllowedAddresses { get; set; }
+    public string AllowedAddresses { get; set; }
 
-        public string[] AllowedAddressesParsed => AllowedAddresses.Split(", ");
+    public string[] AllowedAddressesParsed => AllowedAddresses.Split(", ");
 
-        [Required]
-        public DateTime PurchaseTime { get; set; }
+    [Required]
+    public DateTime PurchaseTime { get; set; }
 
-        [Required]
-        public DateTime ExpirationTime { get; set; }
-
-
-        public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
-
-        public bool NotExpired => Expired == false;
+    [Required]
+    public DateTime ExpirationTime { get; set; }
 
 
+    public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
 
-        public override string ToString()
-        {
-            TimeSpan timeSpan = ExpirationTime - DateTime.Now; 
-            return $"[Plugin: {Name}, Key: {Key}], Purchased: {PurchaseTime}, Is Expired: {Expired}, Expires in: {timeSpan.Days}d. {timeSpan.Minutes}m. {timeSpan.Seconds}s.";
-        }
+    public bool NotExpired => Expired == false;
+
+
+
+    public override string ToString()
+    {
+        TimeSpan timeSpan = ExpirationTime - DateTime.Now;
+        return new StringBuilder()
+            .Append($"[{Name}>{Key}]")
+            .Append($"Purchased: {PurchaseTime}")
+            .Append($"Expired: {(Expired ? "Yes" : "No")}")
+            .Append($"Expires ({ExpirationTime}) in: {timeSpan.Days}d. {timeSpan.Seconds}s. {timeSpan.Minutes}m.")
+            .ToString();
     }
 }

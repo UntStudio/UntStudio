@@ -14,7 +14,7 @@ builder.Services.AddDbContext<PluginsDatabaseContext>(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddSingleton<ILoaderHashesVerifierRepository, LoaderHashesVerifierRepository>();
+builder.Services.AddSingleton<IHashesVerifierRepository, LoaderHashesVerifierRepository>();
 
 WebApplication app = builder.Build();
 

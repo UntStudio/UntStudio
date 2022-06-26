@@ -64,7 +64,7 @@ public sealed class StringValidator : IStringValidator
         return this;
     }
 
-    public IStringValidator Give(out IStringValidator self)
+    public IStringValidator Return(out IStringValidator self)
     {
         self = this;
         return this;

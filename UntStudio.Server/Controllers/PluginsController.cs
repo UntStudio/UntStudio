@@ -18,11 +18,11 @@ public sealed class PluginsController : Controller
 
     private readonly IConfiguration configuration;
 
-    private readonly ILoaderHashesVerifierRepository loaderHashesVerifierRepository;
+    private readonly IHashesVerifierRepository loaderHashesVerifierRepository;
 
 
 
-    public PluginsController(PluginsDatabaseContext database, IConfiguration configuration, ILoaderHashesVerifierRepository loaderHashesVerifierRepository)
+    public PluginsController(PluginsDatabaseContext database, IConfiguration configuration, IHashesVerifierRepository loaderHashesVerifierRepository)
     {
         this.database = database;
         this.configuration = configuration;
@@ -43,7 +43,7 @@ public sealed class PluginsController : Controller
         key.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KeyLength)
-            .Give(out IStringValidator keyValidator);
+            .Return(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {
@@ -74,7 +74,7 @@ public sealed class PluginsController : Controller
         key.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KeyLength)
-            .Give(out IStringValidator keyValidator);
+            .Return(out IStringValidator keyValidator);
 
         if (keyValidator.Failed)
         {
@@ -83,7 +83,7 @@ public sealed class PluginsController : Controller
 
         pluginName.Rules()
             .ContentNotNullOrWhiteSpace()
-            .Give(out IStringValidator pluginNameValidator);
+            .Return(out IStringValidator pluginNameValidator);
 
         if (pluginNameValidator.Failed)
         {
