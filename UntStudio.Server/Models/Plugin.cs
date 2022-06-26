@@ -36,6 +36,7 @@ public class Plugin
     [StringLength(19, MinimumLength = 19)]
     public string Key { get; set; }
 
+    [Required]
     public string AllowedAddresses { get; set; }
 
     public string[] AllowedAddressesParsed => AllowedAddresses.Split(", ");
@@ -45,7 +46,6 @@ public class Plugin
 
     [Required]
     public DateTime ExpirationTime { get; set; }
-
 
     public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
 

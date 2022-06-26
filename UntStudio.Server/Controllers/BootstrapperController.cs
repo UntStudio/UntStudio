@@ -7,10 +7,12 @@ using System.Linq;
 using UntStudio.Server.Data;
 using UntStudio.Server.Models;
 using UntStudio.Server.Strings;
-using static UntStudio.Server.Models.RequestResult;
+using static UntStudio.Server.Models.RequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public sealed class BootstrapperController : Controller
 {
     private readonly PluginsDatabaseContext database;
@@ -27,6 +29,7 @@ public sealed class BootstrapperController : Controller
 
 
 
+    [HttpGet]
     public IActionResult UnloadLoader(string key)
     {
         key.Rules()
@@ -41,7 +44,7 @@ public sealed class BootstrapperController : Controller
 
         if (this.database.Data.Any(p => p.Key.Equals(key) && p.NotExpired) == false)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResult(CodeResponse.NotFoundOrSubscriptionExpired)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NotFoundOrSubscriptionExpired)));
         }
 
         string file = Path.Combine(this.configuration["PluginsLoader:Path"]);

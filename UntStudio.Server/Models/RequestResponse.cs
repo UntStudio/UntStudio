@@ -1,19 +1,26 @@
 ﻿namespace UntStudio.Server.Models;
 
-public class RequestResult
+public class RequestResponse
 {
-    public RequestResult(CodeResponse response)
+    public readonly CodeResponse Code;
+
+
+
+    public RequestResponse(CodeResponse code)
     {
-        Response = response;
+        Code = code;
+    }
+
+    public RequestResponse()
+    {
     }
 
 
 
-    public CodeResponse Response { get; set; }
-
     public enum CodeResponse
     {
         VersionOutdated,
+        KeyValidationFailed,
         NotFound,
         SubscriptionExpired,
         NotFoundOrSubscriptionExpired,

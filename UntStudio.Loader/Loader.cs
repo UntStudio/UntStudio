@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
 
@@ -11,6 +12,7 @@ namespace UntStudio.Loader
             ILoaderBuilder builder = new LoaderBuilder();
 
             builder.Services.AddSingleton<IServer, Server>();
+            builder.AddLogging(new ConsoleLogging());
 
             return builder.Build();
         }
