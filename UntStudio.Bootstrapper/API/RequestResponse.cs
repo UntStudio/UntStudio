@@ -1,4 +1,4 @@
-﻿namespace UntStudio.Loader.API
+﻿namespace UntStudio.Bootstrapper.API
 {
     public class RequestResponse
     {

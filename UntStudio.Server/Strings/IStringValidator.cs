@@ -12,11 +12,11 @@ public interface IStringValidator : IValidator
 
     IStringValidator ContentNotNullOrWhiteSpace();
 
-    IStringValidator Return(out IStringValidator self);
-
     IStringValidator ThrowIfFailed(Type type);
 
     IStringValidator ThrowIfFailed(string message);
 
     IStringValidator ThrowIfFailed(Exception exception);
+
+    IStringValidator Return(out IStringValidator self);
 }

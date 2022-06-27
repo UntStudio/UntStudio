@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UntStudio.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class PluginsTableInit : Migration
+    public partial class PluginsDatabaseUpdatedMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,9 +19,10 @@ namespace UntStudio.Server.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(19)", maxLength: 19, nullable: false),
-                    AllowedAddresses = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AllowedAddresses = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PurchaseTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpirationTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ExpirationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Free = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

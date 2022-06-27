@@ -2,7 +2,7 @@
 
 public class RequestResponse
 {
-    public readonly CodeResponse Code;
+    public CodeResponse Code;
 
 
 
@@ -21,8 +21,9 @@ public class RequestResponse
     {
         VersionOutdated,
         KeyValidationFailed,
-        NotFound,
+        NameValidationFailed,
+        SpecifiedKeyNotFound,
+        SpecifiedKeyOrNameNotFound,
         SubscriptionExpired,
-        NotFoundOrSubscriptionExpired,
     }
 }

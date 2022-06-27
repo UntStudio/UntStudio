@@ -12,8 +12,8 @@ using UntStudio.Server.Data;
 namespace UntStudio.Server.Migrations
 {
     [DbContext(typeof(PluginsDatabaseContext))]
-    [Migration("20220623104443_PluginsTableInit")]
-    partial class PluginsTableInit
+    [Migration("20220627134548_PluginsDatabaseUpdatedMigration")]
+    partial class PluginsDatabaseUpdatedMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,10 +34,14 @@ namespace UntStudio.Server.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("AllowedAddresses")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpirationTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Free")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Key")
                         .IsRequired()

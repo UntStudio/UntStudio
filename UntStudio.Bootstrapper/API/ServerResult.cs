@@ -1,7 +1,6 @@
 ﻿using System.Net;
-using UntStudio.Loader.API;
 
-namespace UntStudio.Loader.Servers
+namespace UntStudio.Bootstrapper.API
 {
     internal class ServerResult
     {

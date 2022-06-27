@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -11,9 +13,7 @@ using static UntStudio.Server.Models.RequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public sealed class BootstrapperController : Controller
+public sealed class BootstrapperController : ControllerBase
 {
     private readonly PluginsDatabaseContext database;
 
@@ -29,22 +29,31 @@ public sealed class BootstrapperController : Controller
 
 
 
-    [HttpGet]
     public IActionResult UnloadLoader(string key)
     {
-        key.Rules()
-            .ContentNotNullOrWhiteSpace()
-            .ShouldBeEqualToCharactersLenght(19)
-            .Return(out IStringValidator keyValidator);
-
-        if (keyValidator.Failed)
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues value) == false)
         {
             return BadRequest();
         }
 
-        if (this.database.Data.Any(p => p.Key.Equals(key) && p.NotExpired) == false)
+        if (value != "UntStudio.Loader")
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NotFoundOrSubscriptionExpired)));
+            return BadRequest();
+        }
+
+        key.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnowPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyValidator);
+
+        if (keyValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+        }
+
+        if (this.database.Data.ToList().Any(p => p.NotExpired == false && p.Key.Equals(key)) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyNotFound)));
         }
 
         string file = Path.Combine(this.configuration["PluginsLoader:Path"]);

@@ -4,5 +4,5 @@ public interface IHashesVerifierRepository
 {
     bool Verify(byte[] bytes);
 
-    string GetHashFrom(string file);
+    string GetHashFrom(byte[] bytes);
 }

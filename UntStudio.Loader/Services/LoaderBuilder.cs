@@ -3,15 +3,19 @@ using UntStudio.Loader.Logging;
 
 namespace UntStudio.Loader.Services
 {
-    internal class LoaderBuilder : ILoaderBuilder
+    internal sealed class LoaderBuilder : ILoaderBuilder
     {
         public IServiceCollection Services { get; }
 
 
 
-        
         public IServiceCollection AddLogging(ILogging logger)
         {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             Services.AddSingleton(logger);
             return Services;
         }

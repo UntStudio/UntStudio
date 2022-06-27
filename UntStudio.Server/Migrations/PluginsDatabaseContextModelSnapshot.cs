@@ -31,10 +31,14 @@ namespace UntStudio.Server.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("AllowedAddresses")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpirationTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Free")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Key")
                         .IsRequired()

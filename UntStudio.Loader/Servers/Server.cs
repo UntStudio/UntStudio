@@ -1,25 +1,36 @@
 ﻿using Newtonsoft.Json;
 using System.Reflection;
 using UntStudio.Loader.API;
+using UntStudio.Loader.Logging;
 
 namespace UntStudio.Loader.Servers
 {
-    internal sealed class Server
+    internal sealed class Server : IServer
     {
-        private const string GetPluginRequest = "https://localhost:7192/api/plugins/getplugin?loaderBytes={0}&key={1}";
+        private readonly ILogging logging;
+
+        private const string UnloadPluginRequest = "https://localhost:7192/api/Bootstrapper/unload?loaderBytes={0}&key={1}&name={2}";
 
 
 
-        public async Task<ServerResult> GetPluginAsync(string key)
+        public Server(ILogging logging)
+        {
+            this.logging = logging;
+        }
+
+
+
+        public async Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default)
         {
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("User-Agent", "UntStudio.Loader");
 
             try
             {
-                string responseText = await httpClient.GetStringAsync(string.Format(GetPluginRequest,
-                    File.ReadAllBytes(Assembly.GetExecutingAssembly().Location),
-                    key));
+                string responseText = await httpClient.GetStringAsync(string.Format(UnloadPluginRequest, 
+                    File.ReadAllBytes(Assembly.GetExecutingAssembly().Location), 
+                    key,
+                    name), cancellationToken);
 
                 RequestResponse response = null;
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
@@ -27,22 +38,18 @@ namespace UntStudio.Loader.Servers
                     return new ServerResult(response);
                 }
 
-                Plugin plugin = null;
-                if ((plugin = JsonConvert.DeserializeObject<Plugin>(responseText)) != null)
-                {
-                    return new ServerResult(plugin);
-                }
+                return new ServerResult(Convert.FromBase64String(responseText));
             }
             catch (HttpRequestException ex)
             {
+                this.logging.Log($"An error occured while getting loader. {ex}");
                 return new ServerResult(ex.StatusCode);
             }
-            return null;
-        }
-
-        public async Task<ServerResult> GetLoaderAsync()
-        {
-            return null;
+            catch (Exception ex)
+            {
+                this.logging.Log($"An error occured while getting loader. {ex}");
+            }
+            return new ServerResult();
         }
     }
 }

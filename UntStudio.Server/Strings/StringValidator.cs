@@ -12,7 +12,7 @@ public sealed class StringValidator : IStringValidator
 
     public StringValidator(string content)
     {
-        this.content = content;
+        this.content = content ?? string.Empty;
         success = true;
     }
 
@@ -64,12 +64,6 @@ public sealed class StringValidator : IStringValidator
         return this;
     }
 
-    public IStringValidator Return(out IStringValidator self)
-    {
-        self = this;
-        return this;
-    }
-
     public IStringValidator ThrowIfFailed(Type type)
     {
         if (type == null)
@@ -78,7 +72,6 @@ public sealed class StringValidator : IStringValidator
         }
 
         ThrowIfFailed(type.Name);
-
         return this;
     }
 
@@ -104,5 +97,11 @@ public sealed class StringValidator : IStringValidator
         return Failed
             ? throw exception
             : this;
+    }
+
+    public IStringValidator Return(out IStringValidator self)
+    {
+        self = this;
+        return this;
     }
 }

@@ -21,6 +21,11 @@ public class Plugin
     {
     }
 
+    public Plugin(string name, string key) : this(name, key, string.Empty, DateTime.Now.AddYears(5))
+    {
+        Free = true;
+    }
+
     public Plugin()
     {
     }
@@ -47,6 +52,8 @@ public class Plugin
     [Required]
     public DateTime ExpirationTime { get; set; }
 
+    public bool Free { get; set; }
+
     public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
 
     public bool NotExpired => Expired == false;
@@ -55,12 +62,15 @@ public class Plugin
 
     public override string ToString()
     {
-        TimeSpan timeSpan = ExpirationTime - DateTime.Now;
+        TimeSpan leftTimeForExpire = ExpirationTime - DateTime.Now;
         return new StringBuilder()
             .Append($"[{Name}>{Key}]")
-            .Append($"Purchased: {PurchaseTime}")
-            .Append($"Expired: {(Expired ? "Yes" : "No")}")
-            .Append($"Expires ({ExpirationTime}) in: {timeSpan.Days}d. {timeSpan.Seconds}s. {timeSpan.Minutes}m.")
+            .Append($"\nId: {Id}")
+            .Append($"\nPurchased: {PurchaseTime}")
+            .Append($"\nExpired: {(Expired ? "Yes" : "No")}")
+            .Append($"\nAllowed Addresses: {AllowedAddresses}")
+            .Append($"\nExpires ({ExpirationTime}) in: {leftTimeForExpire.Days}d.")
+            .Append($"\nFree: {(Free ? "Yes" : "No")}")
             .ToString();
     }
 }

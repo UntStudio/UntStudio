@@ -25,24 +25,18 @@ public sealed class LoaderHashesVerifierRepository : IHashesVerifierRepository
             throw new ArgumentNullException(nameof(bytes));
         }
 
-        string realLoaderHash = GetHashFrom(this.configuration["PluginsLoader:Path"]);
-        string tempBytesFilePathHolder = Path.Combine(this.configuration["Temp:Path"], bytes.GetLongLength(0).ToString(), ".dll");
-        File.WriteAllBytes
-        (
-            path: tempBytesFilePathHolder, 
-            bytes: bytes
-        );
-        string tempBytesHash = GetHashFrom(tempBytesFilePathHolder);
+        string realLoaderHash = GetHashFrom(File.ReadAllBytes(this.configuration["PluginsLoader:Path"]));
+        string tempBytesHash = GetHashFrom(bytes);
         return realLoaderHash.Equals(tempBytesHash);
     }
 
-    public string GetHashFrom(string file)
+    public string GetHashFrom(byte[] bytes)
     {
         string hash = null;
-        using (FileStream fileStream = File.OpenRead(file))
+        using (MemoryStream memoryStream = new MemoryStream(bytes))
         {
             SHA256Managed sha256 = new SHA256Managed();
-            byte[] hashBytes = sha256.ComputeHash(fileStream);
+            byte[] hashBytes = sha256.ComputeHash(memoryStream);
 
             hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
         }

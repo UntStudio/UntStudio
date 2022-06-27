@@ -2,6 +2,6 @@
 {
     internal interface IServer
     {
-        void SendRequest(string key, string pluginName);
+        Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default);
     }
 }
