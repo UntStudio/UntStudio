@@ -12,5 +12,5 @@ public sealed class PluginsDatabaseContext : DbContext
 
 
 
-    public DbSet<Plugin> Data { get; set; }
+    public DbSet<PluginSubscription> Data { get; set; }
 }

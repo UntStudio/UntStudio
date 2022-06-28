@@ -1,5 +1,10 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using UntStudio.Loader.API;
 using UntStudio.Loader.Logging;
 
@@ -25,12 +30,15 @@ namespace UntStudio.Loader.Servers
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("User-Agent", "UntStudio.Loader");
 
+            HttpResponseMessage responseMessage = null;
             try
             {
-                string responseText = await httpClient.GetStringAsync(string.Format(UnloadPluginRequest, 
-                    File.ReadAllBytes(Assembly.GetExecutingAssembly().Location), 
+                responseMessage = await httpClient.GetAsync(string.Format(UnloadPluginRequest,
+                    File.ReadAllBytes(Assembly.GetExecutingAssembly().Location),
                     key,
                     name), cancellationToken);
+
+                string responseText = await responseMessage.Content.ReadAsStringAsync();
 
                 RequestResponse response = null;
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
@@ -43,11 +51,14 @@ namespace UntStudio.Loader.Servers
             catch (HttpRequestException ex)
             {
                 this.logging.Log($"An error occured while getting loader. {ex}");
-                return new ServerResult(ex.StatusCode);
+                if (responseMessage != null)
+                {
+                    return new ServerResult(responseMessage.StatusCode);
+                }
             }
             catch (Exception ex)
             {
-                this.logging.Log($"An error occured while getting loader. {ex}");
+                this.logging.Log($"An error occured while getting loader. Error: {ex}");
             }
             return new ServerResult();
         }

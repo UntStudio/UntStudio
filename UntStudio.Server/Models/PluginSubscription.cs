@@ -5,9 +5,9 @@ using System.Text;
 
 namespace UntStudio.Server.Models;
 
-public class Plugin
+public class PluginSubscription
 {
-    public Plugin(string name, string key, string allowedAddresses, DateTime purchaseTime, DateTime expirationTime)
+    public PluginSubscription(string name, string key, string allowedAddresses, DateTime purchaseTime, DateTime expirationTime)
     {
         Name = name;
         Key = key;
@@ -16,17 +16,16 @@ public class Plugin
         AllowedAddresses = allowedAddresses;
     }
 
-    public Plugin(string name, string key, string allowedAddresses, DateTime expirationTime) 
+    public PluginSubscription(string name, string key, string allowedAddresses, DateTime expirationTime) 
         : this(name, key, allowedAddresses, DateTime.Now, expirationTime)
     {
     }
 
-    public Plugin(string name, string key) : this(name, key, string.Empty, DateTime.Now.AddYears(5))
+    public PluginSubscription(string name, string key) : this(name, key, string.Empty, DateTime.Now.AddYears(5))
     {
-        Free = true;
     }
 
-    public Plugin()
+    public PluginSubscription()
     {
     }
 
@@ -54,9 +53,15 @@ public class Plugin
 
     public bool Free { get; set; }
 
+    public bool Banned { get; set; }
+
+    public bool NotBanned => Banned == false;
+
     public bool Expired => (ExpirationTime - DateTime.Now).TotalMilliseconds <= 0;
 
     public bool NotExpired => Expired == false;
+
+    public bool NotBannedOrExpired => NotBanned && NotExpired;
 
 
 
@@ -70,7 +75,23 @@ public class Plugin
             .Append($"\nExpired: {(Expired ? "Yes" : "No")}")
             .Append($"\nAllowed Addresses: {AllowedAddresses}")
             .Append($"\nExpires ({ExpirationTime}) in: {leftTimeForExpire.Days}d.")
+            .Append($"\nBlocked: {(Banned ? "Yes" : "No")}")
             .Append($"\nFree: {(Free ? "Yes" : "No")}")
             .ToString();
+    }
+
+    public bool SetBan()
+    {
+        return Banned = true;
+    }
+
+    public bool SetUnban()
+    {
+        return Banned = false;
+    }
+
+    public bool SetFree()
+    {
+        return Free = true;
     }
 }

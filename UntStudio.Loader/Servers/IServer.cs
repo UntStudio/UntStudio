@@ -1,6 +1,9 @@
-﻿namespace UntStudio.Loader.Servers
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace UntStudio.Loader.Servers
 {
-    internal interface IServer
+    public interface IServer
     {
         Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default);
     }

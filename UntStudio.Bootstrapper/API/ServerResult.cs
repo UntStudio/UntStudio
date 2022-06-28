@@ -2,7 +2,7 @@
 
 namespace UntStudio.Bootstrapper.API
 {
-    internal class ServerResult
+    internal sealed class ServerResult
     {
         public RequestResponse Response;
 

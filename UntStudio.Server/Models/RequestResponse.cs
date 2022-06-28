@@ -22,8 +22,9 @@ public class RequestResponse
         VersionOutdated,
         KeyValidationFailed,
         NameValidationFailed,
-        SpecifiedKeyNotFound,
-        SpecifiedKeyOrNameNotFound,
+        SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound,
+        IPNotBindedOrSpecifiedKeyOrNameNotFound,
+        SubscriptionBanned,
         SubscriptionExpired,
     }
 }

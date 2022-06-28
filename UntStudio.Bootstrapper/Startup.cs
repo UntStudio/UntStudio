@@ -1,26 +1,36 @@
 ﻿using Rocket.Core.Plugins;
 using SDG.Unturned;
+using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.Loaders;
+using static UntStudio.Bootstrapper.API.RequestResponse;
 
 namespace UntStudio.Bootstrapper
 {
     internal sealed class Startup : RocketPlugin<BootsrapperConfiguration>
     {
-        private static IBootsrapper bootsrapper;
-
-
-
         protected override async void Load()
         {
-            bootsrapper = new Bootsrapper();
-            ServerResult serverResult = await bootsrapper.GetUnloadLoaderAsync(Configuration.Instance.Key);
+            ServerResult serverResult = await new Bootsrapper().GetUnloadLoaderAsync(Configuration.Instance.Key);
+
             if (serverResult.HasResponse)
             {
-                Rocket.Core.Logging.Logger.Log("Response from server: " + serverResult.Response.Code);
+                Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
+                string message = serverResult.Response.Code switch
+                {
+                    CodeResponse.VersionOutdated                         => "Loader version outdated, please download latest!",
+                    CodeResponse.KeyValidationFailed                     => "Please, check your key, and write it properly!",
+                    CodeResponse.NameValidationFailed                    => "Plugin name validation failed, please verify your plugin configuration.",
+                    CodeResponse.IPNotBindedOrSpecifiedKeyOrNameNotFound => "Your key is not binded or key does not exist or plugin name not found.",
+                    CodeResponse.SubscriptionBanned                      => "Your subscription banned.",
+                    CodeResponse.SubscriptionExpired                     => "Your subscription expired.",
+                    _ => "Unknown server response, please contact with Administrator.",
+                };
+                Rocket.Core.Logging.Logger.LogWarning(message);
             }
-
+            
             if (serverResult.HasBytes)
             {
                 string[] enabledPlugins = Configuration.Instance.Plugins
@@ -32,15 +42,15 @@ namespace UntStudio.Bootstrapper
                 {
                     fixed (byte* pointer = serverResult.Bytes)
                     {
-                        IntPtr imageHandle = AssemblyLoader.MonoImageOpenFromData((IntPtr)pointer, serverResult.Bytes.Length, false, out int status1);
-                        AssemblyLoader.MonoAssemblyLoadFrom(imageHandle, string.Empty, out int status2);
-                        IntPtr classHandle = AssemblyLoader.MonoClassFromName(imageHandle, "UntStudio.Loader", "Loader");
-                        IntPtr methodHandle = AssemblyLoader.MonoClassGetMethodFromName(classHandle, "Create", 1);
+                        IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, serverResult.Bytes.Length, false, out _);
+                        ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
+                        IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle, "UntStudio.Loader", "Loader");
+                        IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle, "Create", 1);
 
-                        string pluginsFormatted = string.Join(",", Configuration.Instance.Plugins.Select(p => p));
+                        string pluginsFormatted = string.Join(",", enabledPlugins.Select(p => p));
                         string formattedKeyPluginsText = $"{Configuration.Instance.Key};{pluginsFormatted}";
                         IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
-                        AssemblyLoader.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
+                        ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
                     }
                 }
 
@@ -49,7 +59,7 @@ namespace UntStudio.Bootstrapper
                     PluginAdvertising.Get().AddPlugin(typeof(Startup).Namespace);
                 }
 
-                if (Configuration.Instance.DisplayPluginsInServerPluginsMenu)
+                if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
                 {
                     PluginAdvertising.Get().AddPlugins(enabledPlugins);
                 }

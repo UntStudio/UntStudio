@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
-namespace UntStudio.Bootstrapper.Loaders
+namespace UntStudio.Loader.Loaders
 {
-    internal sealed class AssemblyLoader
+    internal sealed class ExternalMonoCalls
     {
         [DllImport("__Internal", EntryPoint = "mono_image_open_from_data")]
         internal static extern IntPtr MonoImageOpenFromData(IntPtr dataHandle, int dataLenght, bool shouldCopy, out int status);

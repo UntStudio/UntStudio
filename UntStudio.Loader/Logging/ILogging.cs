@@ -1,6 +1,6 @@
 ﻿namespace UntStudio.Loader.Logging
 {
-    internal interface ILogging
+    public interface ILogging
     {
         void Log(string message);
     }

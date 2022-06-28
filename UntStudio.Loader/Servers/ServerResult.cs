@@ -3,7 +3,7 @@ using UntStudio.Loader.API;
 
 namespace UntStudio.Loader.Servers
 {
-    internal class ServerResult
+    public class ServerResult
     {
         public RequestResponse Response;
 

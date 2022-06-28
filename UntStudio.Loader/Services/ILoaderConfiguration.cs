@@ -1,6 +1,6 @@
 ﻿namespace UntStudio.Loader.Services
 {
-    internal interface ILoaderConfiguration
+    public interface ILoaderConfiguration
     {
         string Key { get; }
 
