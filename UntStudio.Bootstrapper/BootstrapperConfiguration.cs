@@ -4,7 +4,7 @@ using UntStudio.Bootstrapper.Models;
 
 namespace UntStudio.Bootstrapper
 {
-    internal sealed class BootsrapperConfiguration : IRocketPluginConfiguration
+    public sealed class BootstrapperConfiguration : IRocketPluginConfiguration
     {
         public string Key;
 

@@ -2,7 +2,7 @@
 
 namespace UntStudio.Bootstrapper.Models
 {
-    internal class Plugin
+    public class Plugin
     {
         public Plugin(string name, bool enabled)
         {

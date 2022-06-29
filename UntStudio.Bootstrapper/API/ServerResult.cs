@@ -1,10 +1,14 @@
 ﻿using System.Net;
+using UntStudio.Bootstrapper.Models;
+using static UntStudio.Bootstrapper.API.RequestResponse;
 
 namespace UntStudio.Bootstrapper.API
 {
     internal sealed class ServerResult
     {
         public RequestResponse Response;
+
+        public LoaderEntryPoint LoaderEntryPoint;
 
         public HttpStatusCode? HttpStatusCode;
 
@@ -15,6 +19,11 @@ namespace UntStudio.Bootstrapper.API
         public ServerResult(RequestResponse response)
         {
             Response = response;
+        }
+
+        public ServerResult(LoaderEntryPoint loaderEntryPoint)
+        {
+            LoaderEntryPoint = loaderEntryPoint;
         }
 
         public ServerResult(HttpStatusCode? httpStatusCode)
@@ -33,10 +42,12 @@ namespace UntStudio.Bootstrapper.API
 
 
 
-        public bool HasResponse => Response != null;
+        public bool HasResponse => Response != null && Response.Code != CodeResponse.None;
 
         public bool HasHttpStatusCode => HttpStatusCode.HasValue;
 
-        public bool HasBytes => Bytes != null;
+        public bool HasBytes => Bytes != null && Bytes.Length > 0;
+
+        public bool HasLoaderEntryPoint => LoaderEntryPoint != null;
     }
 }

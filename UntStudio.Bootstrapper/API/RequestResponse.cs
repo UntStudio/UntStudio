@@ -19,13 +19,14 @@
 
         public enum CodeResponse
         {
-            VersionOutdated,
-            KeyValidationFailed,
-            NameValidationFailed,
-            SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound,
-            IPNotBindedOrSpecifiedKeyOrNameNotFound,
-            SubscriptionBanned,
-            SubscriptionExpired,
+            None = 0,
+            VersionOutdated = 1,
+            KeyValidationFailed = 2,
+            NameValidationFailed = 3,
+            SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound = 4,
+            IPNotBindedOrSpecifiedKeyOrNameNotFound = 5,
+            SubscriptionBanned = 6,
+            SubscriptionExpired = 7,
         }
     }
 }

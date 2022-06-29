@@ -9,61 +9,176 @@ using static UntStudio.Bootstrapper.API.RequestResponse;
 
 namespace UntStudio.Bootstrapper
 {
-    internal sealed class Startup : RocketPlugin<BootsrapperConfiguration>
+    internal sealed class Startup : RocketPlugin<BootstrapperConfiguration>
     {
         protected override async void Load()
         {
-            ServerResult serverResult = await new Bootsrapper().GetUnloadLoaderAsync(Configuration.Instance.Key);
-
-            if (serverResult.HasResponse)
+            try
             {
-                Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
-                string message = serverResult.Response.Code switch
-                {
-                    CodeResponse.VersionOutdated                         => "Loader version outdated, please download latest!",
-                    CodeResponse.KeyValidationFailed                     => "Please, check your key, and write it properly!",
-                    CodeResponse.NameValidationFailed                    => "Plugin name validation failed, please verify your plugin configuration.",
-                    CodeResponse.IPNotBindedOrSpecifiedKeyOrNameNotFound => "Your key is not binded or key does not exist or plugin name not found.",
-                    CodeResponse.SubscriptionBanned                      => "Your subscription banned.",
-                    CodeResponse.SubscriptionExpired                     => "Your subscription expired.",
-                    _ => "Unknown server response, please contact with Administrator.",
-                };
-                Rocket.Core.Logging.Logger.LogWarning(message);
-            }
-            
-            if (serverResult.HasBytes)
-            {
-                string[] enabledPlugins = Configuration.Instance.Plugins
-                    .Where(p => p.Enabled)
-                    .Select(p => p.Name)
-                    .ToArray();
+                Rocket.Core.Logging.Logger.Log("###FLAG 0");
+                IBootstrapper bootstrapper = new Bootstrapper();
+                Rocket.Core.Logging.Logger.Log("###FLAG 1");
 
-                unsafe
+                ServerResult loaderServerResult = await bootstrapper.GetUnloadLoaderAsync(Configuration.Instance.Key);
+                Rocket.Core.Logging.Logger.Log("###FLAG 2");
+
+                if (loaderServerResult == null)
                 {
-                    fixed (byte* pointer = serverResult.Bytes)
+                    Rocket.Core.Logging.Logger.Log("###FLAG 2.0");
+                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+                    return;
+                }
+
+                if (loaderServerResult.HasResponse)
+                {
+                    Rocket.Core.Logging.Logger.Log("###FLAG 3");
+
+                    Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
+                    Rocket.Core.Logging.Logger.Log("###FLAG 4");
+
+                    Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderServerResult.Response.Code));
+                    Rocket.Core.Logging.Logger.Log("###FLAG 4.1");
+                    return;
+                }
+
+
+                Rocket.Core.Logging.Logger.Log("###FLAG 5");
+
+                ServerResult loaderEntryPointServerResult = await bootstrapper.GetLoaderEntryPointAsync(Configuration.Instance.Key);
+                Rocket.Core.Logging.Logger.Log("###FLAG 6");
+
+                if (loaderEntryPointServerResult == null)
+                {
+                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+                    return;
+                }
+
+                if (loaderEntryPointServerResult.HasResponse)
+                {
+                    Rocket.Core.Logging.Logger.Log("###FLAG 7");
+
+                    Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
+                    Rocket.Core.Logging.Logger.Log("###FLAG 8");
+                    Rocket.Core.Logging.Logger.Log("###FLAG 8.0: Message: " + loaderEntryPointServerResult.Response.Code.ToString());
+
+                    Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderEntryPointServerResult.Response.Code));
+                    Rocket.Core.Logging.Logger.Log("###FLAG 9");
+
+                    return;
+                }
+
+                if (loaderEntryPointServerResult.HasLoaderEntryPoint == false)
+                {
+                    Rocket.Core.Logging.Logger.Log("###FLAG 9.00");
+                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+
+                    return;
+                }
+
+                Rocket.Core.Logging.Logger.Log("###FLAG 10");
+
+                if (loaderServerResult.HasBytes)
+                {
+                    Rocket.Core.Logging.Logger.Log("###FLAG 11");
+
+                    string[] enabledPlugins = Configuration.Instance.Plugins
+                        .Where(p => p.Enabled)
+                        .Select(p => p.Name)
+                        .ToArray();
+
+                    Rocket.Core.Logging.Logger.Log("###FLAG 12");
+
+                    unsafe
                     {
-                        IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, serverResult.Bytes.Length, false, out _);
-                        ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
-                        IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle, "UntStudio.Loader", "Loader");
-                        IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle, "Create", 1);
+                        Rocket.Core.Logging.Logger.Log("###FLAG 13");
 
-                        string pluginsFormatted = string.Join(",", enabledPlugins.Select(p => p));
-                        string formattedKeyPluginsText = $"{Configuration.Instance.Key};{pluginsFormatted}";
-                        IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
-                        ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
+                        fixed (byte* pointer = loaderServerResult.Bytes)
+                        {
+                            Rocket.Core.Logging.Logger.Log("###FLAG 14");
+
+                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, false, out _);
+                            Rocket.Core.Logging.Logger.Log("###FLAG 15");
+
+                            ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
+                            Rocket.Core.Logging.Logger.Log("###FLAG 16");
+
+                            IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle,
+                                loaderEntryPointServerResult.LoaderEntryPoint.Namespace,
+                                loaderEntryPointServerResult.LoaderEntryPoint.Class);
+                            Rocket.Core.Logging.Logger.Log("###FLAG 17");
+
+                            IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
+                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);
+
+                            Rocket.Core.Logging.Logger.Log("###FLAG 18");
+
+                            string pluginsFormatted = string.Join(",", enabledPlugins.Select(p => p));
+                            Rocket.Core.Logging.Logger.Log("###FLAG 19");
+
+                            string formattedKeyPluginsText = $"{Configuration.Instance.Key};{pluginsFormatted}";
+                            Rocket.Core.Logging.Logger.Log("###FLAG 20");
+
+                            IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
+                            Rocket.Core.Logging.Logger.Log("###FLAG 21");
+
+                            ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
+                            Rocket.Core.Logging.Logger.Log("###FLAG 22");
+
+                        }
+                        Rocket.Core.Logging.Logger.Log("###FLAG 23");
+
                     }
-                }
 
-                if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
-                {
-                    PluginAdvertising.Get().AddPlugin(typeof(Startup).Namespace);
-                }
+                    Rocket.Core.Logging.Logger.Log("###FLAG 24");
 
-                if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
-                {
-                    PluginAdvertising.Get().AddPlugins(enabledPlugins);
+                    if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
+                    {
+                        Rocket.Core.Logging.Logger.Log("###FLAG 25");
+
+                        PluginAdvertising.Get().AddPlugin(typeof(Startup).Namespace);
+                        Rocket.Core.Logging.Logger.Log("###FLAG 26");
+
+                    }
+
+                    Rocket.Core.Logging.Logger.Log("###FLAG 27");
+
+                    if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
+                    {
+                        Rocket.Core.Logging.Logger.Log("###FLAG 28");
+
+                        PluginAdvertising.Get().AddPlugins(enabledPlugins);
+                        Rocket.Core.Logging.Logger.Log("###FLAG 29");
+
+                    }
+                    Rocket.Core.Logging.Logger.Log("###FLAG 31");
+
                 }
+                Rocket.Core.Logging.Logger.Log("###FLAG 32");
             }
+            catch (Exception ex)
+            {
+                Rocket.Core.Logging.Logger.LogException(ex, "An error ocurred while loading bootsrapper!");
+            }
+            Rocket.Core.Logging.Logger.Log("###FLAG 33");
+        }
+
+
+        private string translateServerResponse(CodeResponse code)
+        {
+            Rocket.Core.Logging.Logger.Log("###FLAG 100");
+
+            return code switch
+            {
+                CodeResponse.None                                               => "Nothing.",
+                CodeResponse.VersionOutdated                                    => "Loader version outdated, please download latest!",
+                CodeResponse.KeyValidationFailed                                => "Please, check your key, and write it properly!",
+                CodeResponse.NameValidationFailed                               => "Plugin name validation failed, please verify your plugin configuration.",
+                CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound  => "Your subscription banned or expired or specified key not found.",
+                CodeResponse.IPNotBindedOrSpecifiedKeyOrNameNotFound            => "Your key is not binded or key does not exist or plugin name not found.",
+                CodeResponse.SubscriptionBanned                                 => "Your subscription was banned.",
+                CodeResponse.SubscriptionExpired                                => "Your subscription was expired.",
+                _ => "Unknown server response, please contact with Administrator.",
+            };
         }
     }
 }

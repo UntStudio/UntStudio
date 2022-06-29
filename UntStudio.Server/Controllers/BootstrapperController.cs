@@ -4,7 +4,6 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Linq;
 using UntStudio.Server.Data;
 using UntStudio.Server.Knowns;
@@ -31,6 +30,49 @@ public sealed class BootstrapperController : ControllerBase
 
 
     public IActionResult UnloadLoader()
+    {
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        {
+            Console.WriteLine("Errore #1!");
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
+        {
+            Console.WriteLine("Errore #2!");
+            return BadRequest();
+        }
+
+        if (userAgentStringValue != KnownHeaders.UserAgentLoaderValue)
+        {
+            Console.WriteLine("Errore #3!");
+            return BadRequest();
+        }
+
+        string key = keyStringValue.ToString();
+        key.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyStringValidator);
+
+        if (keyStringValidator.Failed)
+        {
+            Console.WriteLine("Errore #4!");
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+        }
+
+        if (this.database.Data.ToList().Any(p => p.NotBannedOrExpired && p.Key.Equals(p.Key) && p.Free) ||
+            this.database.Data.ToList().Any(p => p.NotBannedOrExpired && p.Key.Equals(p.Key)))
+        {
+            Console.WriteLine("Returned loader!");
+            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
+        }
+
+        Console.WriteLine("Errore #5!");
+        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound)));
+    }
+
+    public IActionResult GetLoaderEntryPoint()
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
@@ -66,7 +108,11 @@ public sealed class BootstrapperController : ControllerBase
             }
         }
 
-        string file = Path.Combine(this.configuration["PluginsLoader:Path"]);
-        return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(file)));
+        return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
+        (
+            this.configuration["LoaderEntryPoint:Namespace"],
+            this.configuration["LoaderEntryPoint:Class"],
+            this.configuration["LoaderEntryPoint:Method"]))
+        );
     }
 }

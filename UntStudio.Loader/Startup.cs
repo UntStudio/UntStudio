@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UntStudio.Loader.Loaders;
@@ -17,7 +18,6 @@ namespace UntStudio.Loader
         }
 
 
-
         private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging)
         {
             for (int i = 0; i < configuration.Plugins.Length; i++)
@@ -33,29 +33,29 @@ namespace UntStudio.Loader
                             fixed (byte* pointer = serverResult.Bytes)
                             {
                                 IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, serverResult.Bytes.Length, false, out _);
-                                ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
-                            }
-                        }
+                                IntPtr assemblyHandle = ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
 
-                        Type[] types = null;
-                        try
-                        {
-                            Assembly assembly = Assembly.Load(serverResult.Bytes);
-                            types = assembly.GetTypes();
-                        }
-                        catch (ReflectionTypeLoadException ex)
-                        {
-                            types = ex.Types;
-                        }
+                                GameObject containerGameObject = new GameObject();
+                                MethodInfo createGameObjectMethodInfo = typeof(GameObject).GetMethod("Internal_CreateGameObject",
+                                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+                                MethodInfo addComponentMethodInfo = typeof(GameObject).GetMethod("Internal_AddComponentWithType",
+                                    BindingFlags.Instance | BindingFlags.NonPublic);
 
-                        foreach (Type type in types)
-                        {
-                            if (type.GetInterface("IRocketPlugin") != null)
-                            {
-                                GameObject gameObject = new GameObject(Guid.NewGuid().ToString(), type);
-                                Object.DontDestroyOnLoad(gameObject);
+                                createGameObjectMethodInfo.Invoke(null, new object[]
+                                {
+                                    containerGameObject,
+                                    configuration.Plugins[i],
+                                });
 
-                                logging.Log($"Successfully loaded plugin: {configuration.Plugins[i]}!");
+                                Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name.Equals(configuration.Plugins));
+                                Type pluginType = pluginAssembly.GetTypes().FirstOrDefault(t => t.GetInterface("IRocketPlugin") != null);
+
+                                addComponentMethodInfo.Invoke(containerGameObject, new object[]
+                                {
+                                    pluginType,
+                                });
+
+                                Object.DontDestroyOnLoad(containerGameObject);
                             }
                         }
                     }

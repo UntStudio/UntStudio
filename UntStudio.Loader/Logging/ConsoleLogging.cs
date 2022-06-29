@@ -1,6 +1,8 @@
-﻿namespace UntStudio.Loader.Logging
+﻿using System;
+
+namespace UntStudio.Loader.Logging
 {
-    internal class ConsoleLogging : ILogging
+    public class ConsoleLogging : ILogging
     {
         public void Log(string message)
         {
