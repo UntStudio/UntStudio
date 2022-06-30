@@ -23,7 +23,7 @@ public class RequestResponse
         VersionOutdated,
         KeyValidationFailed,
         NameValidationFailed,
-        SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound,
+        SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound,
         SpecifiedKeyOrIPNotBindedOrNameNotFound,
         SubscriptionBanned,
         SubscriptionExpired,

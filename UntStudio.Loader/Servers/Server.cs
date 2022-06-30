@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using System;
-using System.IO;
 using System.Net;
-using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UntStudio.Loader.API;
@@ -13,8 +13,8 @@ namespace UntStudio.Loader.Servers
     public sealed class Server : IServer
     {
         private readonly ILogging logging;
-
-        private const string UnloadPluginRequest = "https://localhost:7192/api/Bootstrapper/unload?loaderBytes={0}&key={1}&name={2}";
+        
+        private const string UnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/unload?name={0}";
 
 
 
@@ -28,7 +28,7 @@ namespace UntStudio.Loader.Servers
         public async Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default)
         {
             WebClient webClient = new WebClient();
-            webClient.Headers.Add("User-Agent", "UntStudio.Loader");
+            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
             webClient.Headers.Add("Key", key);
 
             this.logging.Log("SERVER LOADER FLAGS: #0");
@@ -36,24 +36,22 @@ namespace UntStudio.Loader.Servers
             try
             {
                 this.logging.Log("SERVER LOADER FLAGS: #1");
-                /*responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest,
-                    File.ReadAllBytes(Assembly.GetExecutingAssembly().Location),
-                    key,
-                    name)));*/
-
-
-                responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest,
-                    key,
-                    name)));
+   
+                responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest, name)));
 
                 this.logging.Log("SERVER LOADER FLAGS: #2");
 
                 RequestResponse response = null;
                 this.logging.Log("SERVER LOADER FLAGS: #3");
-                if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
+
+                if (responseText != null)
                 {
-                    this.logging.Log("SERVER LOADER FLAGS: #4");
-                    return new ServerResult(response);
+                    this.logging.Log("SERVER LOADER FLAGS: #3.0, text: " + responseText);
+                    if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
+                    {
+                        this.logging.Log("SERVER LOADER FLAGS: #4");
+                        return new ServerResult(response);
+                    }
                 }
 
                 this.logging.Log("SERVER LOADER FLAGS: #5");
@@ -69,16 +67,34 @@ namespace UntStudio.Loader.Servers
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
-                this.logging.LogError(ex, "An error occured while getting plugin");
+                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    this.logging.LogError(ex, "License server is down, sorry about that.");
+                }
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    this.logging.Log("Loader version is outdated.");
+                }
+
                 return new ServerResult(response.StatusCode);
             }
             catch (WebException ex)
             {
-                this.logging.LogError(ex, "An error occured while getting plugin");
+                if (ex.Status == WebExceptionStatus.ConnectFailure)
+                {
+                    this.logging.Log("Connection failure, server is down.");
+                }
+                else
+                {
+                    this.logging.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
+                }
+
+                this.logging.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
             }
             catch (Exception ex)
             {
-                this.logging.LogError(ex, "An error occured while getting plugin");
+                this.logging.LogError(ex, "An error occured while getting plugin!");
             }
             this.logging.Log("SERVER LOADER FLAGS: #8");
             return new ServerResult();

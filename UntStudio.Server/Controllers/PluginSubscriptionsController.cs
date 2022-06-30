@@ -38,16 +38,19 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
+            Console.WriteLine("UnloadPlugin------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
+            Console.WriteLine("UnloadPlugin------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
+            Console.WriteLine("UnloadPlugin------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -76,10 +79,14 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p => 
+        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p => 
             p.Key.Equals(key) 
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name) 
+            && p.Free);*/
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
+            && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
         {
@@ -102,9 +109,12 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(freePluginFile)));
         }
 
-        PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p => 
+        /*PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p => 
             p.Key.Equals(key) 
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress)) 
+            && p.Name.Equals(name));*/
+        PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
             && p.Name.Equals(name));
         if (plugin == null)
         {
@@ -134,16 +144,19 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
+            Console.WriteLine("Block------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
+            Console.WriteLine("Block------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
+            Console.WriteLine("Block------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -172,9 +185,13 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name)
+            && p.Free);*/
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -200,9 +217,12 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Ok();
         }
 
-        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        /*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name));*/
+        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
             && p.Name.Equals(name));
         if (paidPlugin == null)
         {
@@ -234,16 +254,19 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
+            Console.WriteLine("Unblock------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
+            Console.WriteLine("Unblock------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
+            Console.WriteLine("Unblock------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -272,9 +295,13 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name)
+            && p.Free);*/
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -300,9 +327,12 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Ok();
         }
 
-        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        /*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name));*/
+        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
             && p.Name.Equals(name));
         if (paidPlugin == null)
         {

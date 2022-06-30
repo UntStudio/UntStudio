@@ -2,9 +2,9 @@
 using SDG.Unturned;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.Loaders;
+using UntStudio.Bootstrapper.Models;
 using static UntStudio.Bootstrapper.API.RequestResponse;
 
 namespace UntStudio.Bootstrapper
@@ -13,7 +13,6 @@ namespace UntStudio.Bootstrapper
     {
         protected override async void Load()
         {
-            IntPtr formattedKeyPluginsTextHandle = default;
             try
             {
                 Rocket.Core.Logging.Logger.Log("###FLAG 0");
@@ -82,6 +81,18 @@ namespace UntStudio.Bootstrapper
                 {
                     Rocket.Core.Logging.Logger.Log("###FLAG 11");
 
+                    foreach (Plugin plugin in Configuration.Instance.UntStudioPlugins)
+                    {
+                        if (plugin.Enabled)
+                        {
+                            await bootstrapper.PutUnblockPluginAsync(Configuration.Instance.Key, plugin.Name);
+                        }
+                        else
+                        {
+                            await bootstrapper.PutBlockPluginAsync(Configuration.Instance.Key, plugin.Name);
+                        }
+                    }
+
                     string[] enabledPlugins = Configuration.Instance.UntStudioPlugins
                         .Where(p => p.Enabled)
                         .Select(p => p.Name)
@@ -142,7 +153,6 @@ namespace UntStudio.Bootstrapper
                             Rocket.Core.Logging.Logger.Log("###FLAG 22");
                         }
                         Rocket.Core.Logging.Logger.Log("###FLAG 23");
-
                     }
 
                     Rocket.Core.Logging.Logger.Log("###FLAG 24");
@@ -175,12 +185,9 @@ namespace UntStudio.Bootstrapper
             {
                 Rocket.Core.Logging.Logger.LogException(ex, "An error ocurred while loading bootsrapper!");
             }
-            finally
-            {
-                Marshal.FreeHGlobal(formattedKeyPluginsTextHandle);
-            }
             Rocket.Core.Logging.Logger.Log("###FLAG 33");
         }
+
 
 
         private string translateServerResponse(CodeResponse code)
@@ -189,17 +196,17 @@ namespace UntStudio.Bootstrapper
 
             return code switch
             {
-                CodeResponse.None                                               => "Nothing.",
-                CodeResponse.VersionOutdated                                    => "Loader version outdated, please download latest!",
-                CodeResponse.KeyValidationFailed                                => "Please, check your key, and write it properly!",
-                CodeResponse.NameValidationFailed                               => "Plugin name validation failed, please verify your plugin configuration.",
-                CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound  => "Your subscription banned or expired or specified key not found.",
-                CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound            => "Your key is not binded or key does not exist or plugin name not found.",
-                CodeResponse.SubscriptionBanned                                 => "Your subscription was banned.",
-                CodeResponse.SubscriptionExpired                                => "Your subscription was expired.",
-                CodeResponse.SubscriptionBlockedByOwner                         => "Your subscription was blocked by yourself, and cannot be used.",
-                CodeResponse.SubscriptionAlreadyBlocked                         => "Your subscription was already blocked by yourself.",
-                CodeResponse.SubscriptionAlreadyUnblocked                       => "Your subscription was already unblocked by yourself.",
+                CodeResponse.None                                                            => "Nothing.",
+                CodeResponse.VersionOutdated                                                 => "Loader version outdated, please download latest!",
+                CodeResponse.KeyValidationFailed                                             => "Please, check your key, and write it properly!",
+                CodeResponse.NameValidationFailed                                            => "Plugin name validation failed, please verify your plugin configuration.",
+                CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound  => "Your subscription banned or IP not binded or expired or specified key not found.",
+                CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound                         => "Your key is not binded or key does not exist or plugin name not found.",
+                CodeResponse.SubscriptionBanned                                              => "Your subscription was banned.",
+                CodeResponse.SubscriptionExpired                                             => "Your subscription was expired.",
+                CodeResponse.SubscriptionBlockedByOwner                                      => "Your subscription was blocked by yourself, and cannot be used.",
+                CodeResponse.SubscriptionAlreadyBlocked                                      => "Your subscription was already blocked by yourself.",
+                CodeResponse.SubscriptionAlreadyUnblocked                                    => "Your subscription was already unblocked by yourself.",
                 _ => "Unknown server response, please contact with Administrator, may version is outdated.",
             };
         }

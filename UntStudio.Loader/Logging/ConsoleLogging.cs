@@ -11,7 +11,7 @@ namespace UntStudio.Loader.Logging
 
         public void LogError(Exception ex, string message)
         {
-            Log($"[ERROR]: {message}, Info: {ex}");
+            Log($"[ERROR]: {message} Info: {ex}");
         }
     }
 }

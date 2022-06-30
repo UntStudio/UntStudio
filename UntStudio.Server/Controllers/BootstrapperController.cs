@@ -31,21 +31,24 @@ public sealed class BootstrapperController : ControllerBase
 
     public IActionResult UnloadLoader()
     {
+        Console.WriteLine("----------------------------------LOCAL IP ADDRESS: " + HttpContext.Connection.LocalIpAddress.ToString());
+        Console.WriteLine("----------------------------------REMOTE IP ADDRESS: " + HttpContext.Connection.RemoteIpAddress.ToString());
+        Console.WriteLine("----------------------------------REMOTE IP MapToIPv4 ADDRESS: " + HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString());
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("Errore #1!");
+            Console.WriteLine("unload loader------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
-            Console.WriteLine("Errore #2!");
+            Console.WriteLine("unload loader------------------------Errore #2!");
             return BadRequest();
         }
 
         if (userAgentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
-            Console.WriteLine("Errore #3!");
+            Console.WriteLine("unload loader------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -61,31 +64,58 @@ public sealed class BootstrapperController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
         }
 
-        if (this.database.Data.ToList().Any(p => p.NotBannedOrExpired && p.Key.Equals(p.Key) && p.Free) ||
-            this.database.Data.ToList().Any(p => p.NotBannedOrExpired && p.Key.Equals(p.Key)))
+        /*if (this.database.Data.ToList().Any(p => 
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())) 
+            && p.Free))
         {
-            Console.WriteLine("Returned loader!");
+            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
+        }*/
+
+        if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)
+            && p.Free))
+        {
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
         }
 
-        Console.WriteLine("Errore #5!");
-        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound)));
+        /*if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))))
+        {
+            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
+        }*/
+
+        if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)))
+        {
+            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
+        }
+
+        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
     }
 
     public IActionResult GetLoaderEntryPoint()
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
+            Console.WriteLine("loader entry point------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
+            Console.WriteLine("loader entry point------------------------Errore #2!");
             return BadRequest();
         }
 
         if (userAgentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
+            Console.WriteLine("loader entry point------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -100,19 +130,48 @@ public sealed class BootstrapperController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
         }
 
-        if (this.database.Data.Any(p => p.Free && p.Key.Equals(key)) == false)
+        /*if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Key.Equals(p.Key)
+            && p.Free) == false)
         {
-            if (this.database.Data.ToList().Any(p => p.NotBannedOrExpired && p.Key.Equals(key)) == false)
-            {
-                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound)));
-            }
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
+        }*/
+
+        if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)
+            && p.Free))
+        {
+            return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
+            (
+                this.configuration["LoaderEntryPoint:Namespace"],
+                this.configuration["LoaderEntryPoint:Class"],
+                this.configuration["LoaderEntryPoint:Method"]))
+            );
         }
 
-        return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
-        (
-            this.configuration["LoaderEntryPoint:Namespace"],
-            this.configuration["LoaderEntryPoint:Class"],
-            this.configuration["LoaderEntryPoint:Method"]))
-        );
+        /*if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Key.Equals(p.Key)) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
+        }*/
+
+        if (this.database.Data.ToList().Any(p =>
+            p.NotBannedOrExpired
+            && p.Key.Equals(p.Key)))
+        {
+            return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
+            (
+                this.configuration["LoaderEntryPoint:Namespace"],
+                this.configuration["LoaderEntryPoint:Class"],
+                this.configuration["LoaderEntryPoint:Method"]))
+            );
+        }
+
+        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
     }
 }

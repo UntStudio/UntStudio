@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UntStudio.Bootstrapper.API;
 
 namespace UntStudio.Bootstrapper
@@ -9,5 +8,9 @@ namespace UntStudio.Bootstrapper
         Task<ServerResult> GetUnloadLoaderAsync(string key);
 
         Task<ServerResult> GetLoaderEntryPointAsync(string key);
+
+        Task<ServerResult> PutBlockPluginAsync(string key, string name);
+
+        Task<ServerResult> PutUnblockPluginAsync(string key, string name);
     }
 }
