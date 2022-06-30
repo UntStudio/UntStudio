@@ -6,6 +6,13 @@ namespace UntStudio.Loader.Services
 {
     internal sealed class LoaderBuilder : ILoaderBuilder
     {
+        public LoaderBuilder()
+        {
+            Services = new ServiceCollection();
+        }
+
+
+
         public IServiceCollection Services { get; }
 
 

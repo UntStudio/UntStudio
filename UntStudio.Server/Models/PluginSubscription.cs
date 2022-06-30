@@ -21,7 +21,7 @@ public class PluginSubscription
     {
     }
 
-    public PluginSubscription(string name, string key) : this(name, key, string.Empty, DateTime.Now.AddYears(5))
+    public PluginSubscription(string name, string key, string allowedAddresses) : this(name, key, allowedAddresses, DateTime.Now.AddYears(5))
     {
     }
 
@@ -43,7 +43,7 @@ public class PluginSubscription
     [Required]
     public string AllowedAddresses { get; set; }
 
-    public string[] AllowedAddressesParsed => AllowedAddresses.Split(", ");
+    public string[] AllowedAddressesParsed => AllowedAddresses.Split(',');
 
     [Required]
     public DateTime PurchaseTime { get; set; }
@@ -54,6 +54,10 @@ public class PluginSubscription
     public bool Free { get; set; }
 
     public bool Banned { get; set; }
+
+    public bool BlockedByOwner { get; set; }
+
+    public bool UnblockedByOwner => BlockedByOwner == false;
 
     public bool NotBanned => Banned == false;
 
@@ -93,5 +97,15 @@ public class PluginSubscription
     public bool SetFree()
     {
         return Free = true;
+    }
+
+    public bool SetBlockedByOwner()
+    {
+        return BlockedByOwner = true;
+    }
+
+    public bool SetUnblockedByOwner()
+    {
+        return BlockedByOwner = false;
     }
 }

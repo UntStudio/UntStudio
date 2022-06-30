@@ -34,7 +34,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
 
 
-    public IActionResult Unload(byte[] loaderBytes, string name)
+    public IActionResult Unload(/*byte[] loaderBytes, */string name)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
@@ -51,10 +51,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return BadRequest();
         }
 
-        if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
+        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
         {
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
-        }
+        }*/
 
         string key = keyStringValue.ToString();
         key.Rules()
@@ -76,21 +76,39 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name) && p.Free);
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p => 
+            p.Key.Equals(key) 
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name) 
+            && p.Free);
         if (freePlugin != null)
         {
+            if (freePlugin.Banned)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBanned)));
+            }
+
+            if (freePlugin.Expired)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
+            }
+
+            if (freePlugin.BlockedByOwner)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBlockedByOwner)));
+            }
+
             string freePluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(freePluginFile)));
         }
 
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p => 
-            p.NotExpired
+            p.Key.Equals(key) 
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress)) 
-            && p.Key.Equals(key) 
             && p.Name.Equals(name));
         if (plugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.IPNotBindedOrSpecifiedKeyOrNameNotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
         }
 
         if (plugin.Banned)
@@ -103,7 +121,212 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
         }
 
+        if (plugin.BlockedByOwner)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBlockedByOwner)));
+        }
+
         string pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
         return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(pluginFile)));
+    }
+
+    public IActionResult Block(string name)
+    {
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
+        {
+            return BadRequest();
+        }
+
+        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
+        }*/
+
+        string key = keyStringValue.ToString();
+        key.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyStringValidator);
+
+        if (keyStringValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+        }
+
+        name.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .Return(out IStringValidator nameValidator);
+
+        if (nameValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
+        }
+
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name)
+            && p.Free);
+        if (freePlugin != null)
+        {
+            if (freePlugin.Banned)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBanned)));
+            }
+
+            if (freePlugin.Expired)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
+            }
+
+            if (freePlugin.BlockedByOwner)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionAlreadyBlocked)));
+            }
+
+            freePlugin.SetBlockedByOwner();
+            this.database.Data.Update(freePlugin);
+            this.database.SaveChanges();
+            return Ok();
+        }
+
+        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name));
+        if (paidPlugin == null)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
+        }
+
+        if (paidPlugin.Banned)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBanned)));
+        }
+
+        if (paidPlugin.Expired)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
+        }
+
+        if (paidPlugin.BlockedByOwner)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionAlreadyBlocked)));
+        }
+
+        paidPlugin.SetBlockedByOwner();
+        this.database.Data.Update(paidPlugin);
+        this.database.SaveChanges();
+        return Ok();
+    }
+
+    public IActionResult Unblock(string name)
+    {
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
+        {
+            return BadRequest();
+        }
+
+        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
+        }*/
+
+        string key = keyStringValue.ToString();
+        key.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyStringValidator);
+
+        if (keyStringValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+        }
+
+        name.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .Return(out IStringValidator nameValidator);
+
+        if (nameValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
+        }
+
+        PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name)
+            && p.Free);
+        if (freePlugin != null)
+        {
+            if (freePlugin.Banned)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBanned)));
+            }
+
+            if (freePlugin.Expired)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
+            }
+
+            if (freePlugin.UnblockedByOwner)
+            {
+                return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionAlreadyUnblocked)));
+            }
+
+            freePlugin.SetUnblockedByOwner();
+            this.database.Data.Update(freePlugin);
+            this.database.SaveChanges();
+            return Ok();
+        }
+
+        PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+            p.Key.Equals(key)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
+            && p.Name.Equals(name));
+        if (paidPlugin == null)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
+        }
+
+        if (paidPlugin.Banned)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBanned)));
+        }
+
+        if (paidPlugin.Expired)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionExpired)));
+        }
+
+        if (paidPlugin.UnblockedByOwner)
+        {
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionAlreadyUnblocked)));
+        }
+
+        paidPlugin.SetUnblockedByOwner();
+        this.database.Data.Update(paidPlugin);
+        this.database.SaveChanges();
+        return Ok();
     }
 }

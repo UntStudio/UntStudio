@@ -13,6 +13,7 @@ namespace UntStudio.Bootstrapper
     {
         protected override async void Load()
         {
+            IntPtr formattedKeyPluginsTextHandle = default;
             try
             {
                 Rocket.Core.Logging.Logger.Log("###FLAG 0");
@@ -81,10 +82,18 @@ namespace UntStudio.Bootstrapper
                 {
                     Rocket.Core.Logging.Logger.Log("###FLAG 11");
 
-                    string[] enabledPlugins = Configuration.Instance.Plugins
+                    string[] enabledPlugins = Configuration.Instance.UntStudioPlugins
                         .Where(p => p.Enabled)
                         .Select(p => p.Name)
                         .ToArray();
+
+                    Rocket.Core.Logging.Logger.Log("###ENABLED PLUGINS:");
+                    for (int i = 0; i < enabledPlugins.Length; i++)
+                    {
+                        Rocket.Core.Logging.Logger.Log(enabledPlugins[i]);
+                    }
+                    Rocket.Core.Logging.Logger.Log("###END OF ENABLED PLUGINS:");
+
 
                     Rocket.Core.Logging.Logger.Log("###FLAG 12");
 
@@ -107,8 +116,11 @@ namespace UntStudio.Bootstrapper
                                 loaderEntryPointServerResult.LoaderEntryPoint.Class);
                             Rocket.Core.Logging.Logger.Log("###FLAG 17");
 
+                            /*IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
+                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);*/
+
                             IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
-                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);
+                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 0);
 
                             Rocket.Core.Logging.Logger.Log("###FLAG 18");
 
@@ -118,12 +130,16 @@ namespace UntStudio.Bootstrapper
                             string formattedKeyPluginsText = $"{Configuration.Instance.Key};{pluginsFormatted}";
                             Rocket.Core.Logging.Logger.Log("###FLAG 20");
 
-                            IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
+                            //IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
+                            //IntPtr formattedKeyPluginsTextHandle = new IntPtr(Convert.ToInt32(formattedKeyPluginsText));
+                            //IntPtr formattedKeyPluginsTextHandle = Marshal.PtrToStringAuto(formattedKeyPluginsText);
+                            //formattedKeyPluginsTextHandle = Marshal.StringToHGlobalUni(formattedKeyPluginsText);
+
                             Rocket.Core.Logging.Logger.Log("###FLAG 21");
 
-                            ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
+                            //ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
+                            ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                             Rocket.Core.Logging.Logger.Log("###FLAG 22");
-
                         }
                         Rocket.Core.Logging.Logger.Log("###FLAG 23");
 
@@ -159,6 +175,10 @@ namespace UntStudio.Bootstrapper
             {
                 Rocket.Core.Logging.Logger.LogException(ex, "An error ocurred while loading bootsrapper!");
             }
+            finally
+            {
+                Marshal.FreeHGlobal(formattedKeyPluginsTextHandle);
+            }
             Rocket.Core.Logging.Logger.Log("###FLAG 33");
         }
 
@@ -174,10 +194,13 @@ namespace UntStudio.Bootstrapper
                 CodeResponse.KeyValidationFailed                                => "Please, check your key, and write it properly!",
                 CodeResponse.NameValidationFailed                               => "Plugin name validation failed, please verify your plugin configuration.",
                 CodeResponse.SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound  => "Your subscription banned or expired or specified key not found.",
-                CodeResponse.IPNotBindedOrSpecifiedKeyOrNameNotFound            => "Your key is not binded or key does not exist or plugin name not found.",
+                CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound            => "Your key is not binded or key does not exist or plugin name not found.",
                 CodeResponse.SubscriptionBanned                                 => "Your subscription was banned.",
                 CodeResponse.SubscriptionExpired                                => "Your subscription was expired.",
-                _ => "Unknown server response, please contact with Administrator.",
+                CodeResponse.SubscriptionBlockedByOwner                         => "Your subscription was blocked by yourself, and cannot be used.",
+                CodeResponse.SubscriptionAlreadyBlocked                         => "Your subscription was already blocked by yourself.",
+                CodeResponse.SubscriptionAlreadyUnblocked                       => "Your subscription was already unblocked by yourself.",
+                _ => "Unknown server response, please contact with Administrator, may version is outdated.",
             };
         }
     }

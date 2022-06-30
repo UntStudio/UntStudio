@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UntStudio.Loader.API;
 using UntStudio.Loader.Loaders;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
@@ -12,14 +13,23 @@ namespace UntStudio.Loader
 {
     public sealed class Startup
     {
-        public Startup(ILoaderConfiguration configuration, IServer server, ILogging logging)
+        public Startup(IServiceProvider serviceProvider)
         {
-            initializeAsync(configuration, server, logging);
+            Loader.Log("Loading Startup NOW!");
+            initializeAsync
+            (
+                (ILoaderConfiguration)serviceProvider.GetService(typeof(ILoaderConfiguration)),
+                (IServer)serviceProvider.GetService(typeof(IServer)),
+                (ILogging)serviceProvider.GetService(typeof(ILogging))
+            );
+            Loader.Log("END OF Loading Startup NOW!");
         }
 
 
         private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging)
         {
+            Loader.Log("RIGHT NOW INITIALIZE ASYNC!-_!__!_!_!__!_!_");
+
             for (int i = 0; i < configuration.Plugins.Length; i++)
             {
                 ServerResult serverResult = await server.GetUnloadPluginAsync(configuration.Key, configuration.Plugins[i]);

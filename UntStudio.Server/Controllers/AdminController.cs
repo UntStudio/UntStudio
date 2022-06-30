@@ -70,7 +70,7 @@ public sealed class AdminController : ControllerBase
         return Ok(JsonConvert.SerializeObject(plugin));
     }
 
-    public IActionResult AddFreeSubscription(string name)
+    public IActionResult AddFreeSubscription(string name, string allowedAddresses)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
@@ -107,7 +107,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = new PluginSubscription(name, key);
+        PluginSubscription plugin = new PluginSubscription(name, key, allowedAddresses);
         plugin.SetFree();
         this.database.Data.Add(plugin);
         this.database.SaveChanges();

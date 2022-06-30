@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using UntStudio.Loader.API;
+using static UntStudio.Loader.API.RequestResponse;
 
-namespace UntStudio.Loader.Servers
+namespace UntStudio.Loader.API
 {
     public class ServerResult
     {
@@ -34,10 +34,10 @@ namespace UntStudio.Loader.Servers
 
 
 
-        public bool HasResponse => Response != null;
+        public bool HasResponse => Response != null && Response.Code != CodeResponse.None;
 
         public bool HasHttpStatusCode => HttpStatusCode.HasValue;
 
-        public bool HasBytes => Bytes != null;
+        public bool HasBytes => Bytes != null && Bytes.Length > 0;
     }
 }

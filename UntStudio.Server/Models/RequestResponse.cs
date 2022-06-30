@@ -19,13 +19,16 @@ public class RequestResponse
 
     public enum CodeResponse
     {
-        None = 0,
-        VersionOutdated = 1,
-        KeyValidationFailed = 2,
-        NameValidationFailed = 3,
-        SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound = 4,
-        IPNotBindedOrSpecifiedKeyOrNameNotFound = 5,
-        SubscriptionBanned = 6,
-        SubscriptionExpired = 7,
+        None,
+        VersionOutdated,
+        KeyValidationFailed,
+        NameValidationFailed,
+        SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound,
+        SpecifiedKeyOrIPNotBindedOrNameNotFound,
+        SubscriptionBanned,
+        SubscriptionExpired,
+        SubscriptionBlockedByOwner,
+        SubscriptionAlreadyBlocked,
+        SubscriptionAlreadyUnblocked,
     }
 }

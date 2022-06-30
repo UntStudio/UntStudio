@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Net.Http;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ using UntStudio.Loader.Logging;
 
 namespace UntStudio.Loader.Servers
 {
-    internal sealed class Server : IServer
+    public sealed class Server : IServer
     {
         private readonly ILogging logging;
 
@@ -27,39 +27,60 @@ namespace UntStudio.Loader.Servers
 
         public async Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default)
         {
-            HttpClient httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "UntStudio.Loader");
+            WebClient webClient = new WebClient();
+            webClient.Headers.Add("User-Agent", "UntStudio.Loader");
+            webClient.Headers.Add("Key", key);
 
-            HttpResponseMessage responseMessage = null;
+            this.logging.Log("SERVER LOADER FLAGS: #0");
+            string responseText = null;
             try
             {
-                responseMessage = await httpClient.GetAsync(string.Format(UnloadPluginRequest,
+                this.logging.Log("SERVER LOADER FLAGS: #1");
+                /*responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest,
                     File.ReadAllBytes(Assembly.GetExecutingAssembly().Location),
                     key,
-                    name), cancellationToken);
+                    name)));*/
 
-                string responseText = await responseMessage.Content.ReadAsStringAsync();
+
+                responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest,
+                    key,
+                    name)));
+
+                this.logging.Log("SERVER LOADER FLAGS: #2");
 
                 RequestResponse response = null;
+                this.logging.Log("SERVER LOADER FLAGS: #3");
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
                 {
+                    this.logging.Log("SERVER LOADER FLAGS: #4");
                     return new ServerResult(response);
                 }
 
-                return new ServerResult(Convert.FromBase64String(responseText));
+                this.logging.Log("SERVER LOADER FLAGS: #5");
             }
-            catch (HttpRequestException ex)
+            catch (JsonReaderException)
             {
-                this.logging.Log($"An error occured while getting loader. {ex}");
-                if (responseMessage != null)
+                if (responseText != null)
                 {
-                    return new ServerResult(responseMessage.StatusCode);
+                    this.logging.Log("SERVER LOADER FLAGS: #6");
+                    return new ServerResult(Convert.FromBase64String(responseText));
                 }
+                this.logging.Log("SERVER LOADER FLAGS: #7");
+            }
+            catch (WebException ex) when (ex.Response is HttpWebResponse response)
+            {
+                this.logging.LogError(ex, "An error occured while getting plugin");
+                return new ServerResult(response.StatusCode);
+            }
+            catch (WebException ex)
+            {
+                this.logging.LogError(ex, "An error occured while getting plugin");
             }
             catch (Exception ex)
             {
-                this.logging.Log($"An error occured while getting loader. Error: {ex}");
+                this.logging.LogError(ex, "An error occured while getting plugin");
             }
+            this.logging.Log("SERVER LOADER FLAGS: #8");
             return new ServerResult();
         }
     }

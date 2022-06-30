@@ -19,13 +19,17 @@
 
         public enum CodeResponse
         {
+            None,
             VersionOutdated,
             KeyValidationFailed,
             NameValidationFailed,
             SubscriptionBannedOrExpiredOrSpecifiedKeyNotFound,
-            IPNotBindedOrSpecifiedKeyOrNameNotFound,
+            SpecifiedKeyOrIPNotBindedOrNameNotFound,
             SubscriptionBanned,
             SubscriptionExpired,
+            SubscriptionBlockedByOwner,
+            SubscriptionAlreadyBlocked,
+            SubscriptionAlreadyUnblocked,
         }
     }
 }
