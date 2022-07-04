@@ -8,9 +8,14 @@ using UntStudio.Server.Repositories;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<PluginsDatabaseContext>(options =>
+builder.Services.AddDbContext<PluginSubscriptionsDatabaseContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PluginSubscriptionsDatabaseConnectionString"));
+});
+
+builder.Services.AddDbContext<AdminsDatabaseContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AdminsDatabaseConnectionString"));
 });
 
 builder.Services.AddControllers();

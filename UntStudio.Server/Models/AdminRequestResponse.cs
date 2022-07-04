@@ -1,26 +1,26 @@
-﻿namespace UntStudio.Server.Models
+﻿namespace UntStudio.Server.Models;
+
+public class AdminRequestResponse
 {
-    public class AdminRequestResponse
+    public AdminCodeResponse Code;
+
+
+
+    public AdminRequestResponse(AdminCodeResponse code)
     {
-        public AdminCodeResponse Code;
+        Code = code;
+    }
 
 
 
-        public AdminRequestResponse(AdminCodeResponse code)
-        {
-            Code = code;
-        }
-
-
-
-        public enum AdminCodeResponse
-        {
-            KeyValidationFailed,
-            NameValidationFailed,
-            SpecifiedPluginKeyOrNameNotFound,
-            NoOnePluginWithSpecifiedKeyNotFound,
-            SpecifiedPluginAlreadyBanned,
-            AllowedAddressesNotSpecified,
-        }
+    public enum AdminCodeResponse
+    {
+        KeyValidationFailed,
+        NameValidationFailed,
+        SpecifiedAdminCredentialsNotExsist,
+        SpecifiedPluginKeyOrNameNotFound,
+        NoOnePluginWithSpecifiedKeyNotFound,
+        SpecifiedPluginAlreadyBanned,
+        AllowedAddressesNotSpecified,
     }
 }

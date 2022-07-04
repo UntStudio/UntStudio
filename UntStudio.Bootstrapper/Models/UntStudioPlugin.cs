@@ -2,15 +2,15 @@
 
 namespace UntStudio.Bootstrapper.Models
 {
-    public class Plugin
+    public class UntStudioPlugin
     {
-        public Plugin(string name, bool enabled)
+        public UntStudioPlugin(string name, bool enabled)
         {
             Name = name;
             Enabled = enabled;
         }
 
-        public Plugin()
+        public UntStudioPlugin()
         {
         }
 

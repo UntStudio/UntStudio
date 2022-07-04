@@ -17,7 +17,7 @@ namespace UntStudio.Server.Controllers;
 
 public sealed class PluginSubscriptionsController : ControllerBase
 {
-    private readonly PluginsDatabaseContext database;
+    private readonly PluginSubscriptionsDatabaseContext database;
 
     private readonly IConfiguration configuration;
 
@@ -25,7 +25,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
 
 
-    public PluginSubscriptionsController(PluginsDatabaseContext database, IConfiguration configuration, IHashesVerifierRepository loaderHashesVerifierRepository)
+    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IHashesVerifierRepository loaderHashesVerifierRepository)
     {
         this.database = database;
         this.configuration = configuration;

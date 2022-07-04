@@ -17,6 +17,12 @@ namespace UntStudio.Bootstrapper.Loaders
         [DllImport("__Internal", EntryPoint = "mono_class_get_method_from_name")]
         internal static extern IntPtr MonoClassGetMethodFromName(IntPtr classHandle, string methodName, int parametersCount);
 
+        [DllImport("__Internal", EntryPoint = "mono_string_new")]
+        internal static extern IntPtr MonoStringNew(IntPtr domainHandle, string text);
+
+        [DllImport("__Internal", EntryPoint = "mono_domain_get")]
+        internal static extern IntPtr MonoDomainGet();
+
         [DllImport("__Internal", EntryPoint = "mono_init_version")]
         internal static extern IntPtr MonoInitVersion(string domainName, string version);
 

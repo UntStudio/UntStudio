@@ -12,7 +12,7 @@ namespace UntStudio.Bootstrapper
 
         public bool DisplayPluginsInServerPluginsMenu;
 
-        public List<Plugin> UntStudioPlugins;
+        public List<UntStudioPlugin> UntStudioPlugins;
 
 
 
@@ -21,10 +21,10 @@ namespace UntStudio.Bootstrapper
             Key = "XXXX-XXXX-XXXX-XXXX";
             DisplayLoaderInServerPluginsMenu = true;
             DisplayPluginsInServerPluginsMenu = true;
-            UntStudioPlugins = new List<Plugin>
+            UntStudioPlugins = new List<UntStudioPlugin>
             {
-                new Plugin(name: "UntStudio.RustSleeper", enabled: true),
-                new Plugin(name: "UntStudio.PluginName", enabled: true),
+                new UntStudioPlugin(name: "UntStudio.OtherPlugin", enabled: true),
+                new UntStudioPlugin(name: "UntStudio.PluginName", enabled: true),
             };
         }
     }

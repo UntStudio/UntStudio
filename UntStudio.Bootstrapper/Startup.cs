@@ -2,6 +2,7 @@
 using SDG.Unturned;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.Loaders;
 using UntStudio.Bootstrapper.Models;
@@ -15,37 +16,23 @@ namespace UntStudio.Bootstrapper
         {
             try
             {
-                Rocket.Core.Logging.Logger.Log("###FLAG 0");
                 IBootstrapper bootstrapper = new Bootstrapper();
-                Rocket.Core.Logging.Logger.Log("###FLAG 1");
-
                 ServerResult loaderServerResult = await bootstrapper.GetUnloadLoaderAsync(Configuration.Instance.Key);
-                Rocket.Core.Logging.Logger.Log("###FLAG 2");
 
                 if (loaderServerResult == null)
                 {
-                    Rocket.Core.Logging.Logger.Log("###FLAG 2.0");
                     Rocket.Core.Logging.Logger.Log("Cannot load loader!");
                     return;
                 }
 
                 if (loaderServerResult.HasResponse)
                 {
-                    Rocket.Core.Logging.Logger.Log("###FLAG 3");
-
                     Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
-                    Rocket.Core.Logging.Logger.Log("###FLAG 4");
-
                     Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderServerResult.Response.Code));
-                    Rocket.Core.Logging.Logger.Log("###FLAG 4.1");
                     return;
                 }
 
-
-                Rocket.Core.Logging.Logger.Log("###FLAG 5");
-
                 ServerResult loaderEntryPointServerResult = await bootstrapper.GetLoaderEntryPointAsync(Configuration.Instance.Key);
-                Rocket.Core.Logging.Logger.Log("###FLAG 6");
 
                 if (loaderEntryPointServerResult == null)
                 {
@@ -55,145 +42,69 @@ namespace UntStudio.Bootstrapper
 
                 if (loaderEntryPointServerResult.HasResponse)
                 {
-                    Rocket.Core.Logging.Logger.Log("###FLAG 7");
-
                     Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
-                    Rocket.Core.Logging.Logger.Log("###FLAG 8");
-                    Rocket.Core.Logging.Logger.Log("###FLAG 8.0: Message: " + loaderEntryPointServerResult.Response.Code.ToString());
-
                     Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderEntryPointServerResult.Response.Code));
-                    Rocket.Core.Logging.Logger.Log("###FLAG 9");
-
                     return;
                 }
 
                 if (loaderEntryPointServerResult.HasLoaderEntryPoint == false)
                 {
-                    Rocket.Core.Logging.Logger.Log("###FLAG 9.00");
                     Rocket.Core.Logging.Logger.Log("Cannot load loader!");
-
                     return;
                 }
 
-                Rocket.Core.Logging.Logger.Log("###FLAG 10");
-
                 if (loaderServerResult.HasBytes)
                 {
-                    Rocket.Core.Logging.Logger.Log("###FLAG 11");
-
-                    foreach (Plugin plugin in Configuration.Instance.UntStudioPlugins)
-                    {
-                        if (plugin.Enabled)
-                        {
-                            await bootstrapper.PutUnblockPluginAsync(Configuration.Instance.Key, plugin.Name);
-                        }
-                        else
-                        {
-                            await bootstrapper.PutBlockPluginAsync(Configuration.Instance.Key, plugin.Name);
-                        }
-                    }
-
-                    string[] enabledPlugins = Configuration.Instance.UntStudioPlugins
-                        .Where(p => p.Enabled)
-                        .Select(p => p.Name)
-                        .ToArray();
-
-                    Rocket.Core.Logging.Logger.Log("###ENABLED PLUGINS:");
-                    for (int i = 0; i < enabledPlugins.Length; i++)
-                    {
-                        Rocket.Core.Logging.Logger.Log(enabledPlugins[i]);
-                    }
-                    Rocket.Core.Logging.Logger.Log("###END OF ENABLED PLUGINS:");
-
-
-                    Rocket.Core.Logging.Logger.Log("###FLAG 12");
-
                     unsafe
                     {
-                        Rocket.Core.Logging.Logger.Log("###FLAG 13");
-
                         fixed (byte* pointer = loaderServerResult.Bytes)
                         {
-                            Rocket.Core.Logging.Logger.Log("###FLAG 14");
-
                             IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, false, out _);
-                            Rocket.Core.Logging.Logger.Log("###FLAG 15");
-
                             ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
-                            Rocket.Core.Logging.Logger.Log("###FLAG 16");
 
                             IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle,
                                 loaderEntryPointServerResult.LoaderEntryPoint.Namespace,
                                 loaderEntryPointServerResult.LoaderEntryPoint.Class);
-                            Rocket.Core.Logging.Logger.Log("###FLAG 17");
-
-                            /*IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
-                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);*/
 
                             IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
-                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 0);
+                                loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);
 
-                            Rocket.Core.Logging.Logger.Log("###FLAG 18");
+                            string pluginsFormatted = string.Join(",", Configuration.Instance.UntStudioPlugins.Select(p => p.Name));
+                            string formattedShowPluginKeyPluginsText = $"{Configuration.Instance.DisplayPluginsInServerPluginsMenu};{Configuration.Instance.Key};{pluginsFormatted}";
+                            string[] array = new string[]
+                            {
+                                formattedShowPluginKeyPluginsText,
+                            };
 
-                            string pluginsFormatted = string.Join(",", enabledPlugins.Select(p => p));
-                            Rocket.Core.Logging.Logger.Log("###FLAG 19");
-
-                            string formattedKeyPluginsText = $"{Configuration.Instance.Key};{pluginsFormatted}";
-                            Rocket.Core.Logging.Logger.Log("###FLAG 20");
-
-                            //IntPtr formattedKeyPluginsTextHandle = Marshal.StringToCoTaskMemUni(formattedKeyPluginsText);
-                            //IntPtr formattedKeyPluginsTextHandle = new IntPtr(Convert.ToInt32(formattedKeyPluginsText));
-                            //IntPtr formattedKeyPluginsTextHandle = Marshal.PtrToStringAuto(formattedKeyPluginsText);
-                            //formattedKeyPluginsTextHandle = Marshal.StringToHGlobalUni(formattedKeyPluginsText);
-
-                            Rocket.Core.Logging.Logger.Log("###FLAG 21");
-
-                            //ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, formattedKeyPluginsTextHandle, IntPtr.Zero);
-                            ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
-                            Rocket.Core.Logging.Logger.Log("###FLAG 22");
+                            IntPtr arrayHandle = Marshal.UnsafeAddrOfPinnedArrayElement(array, 0);
+                            ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, arrayHandle, IntPtr.Zero);
                         }
-                        Rocket.Core.Logging.Logger.Log("###FLAG 23");
                     }
-
-                    Rocket.Core.Logging.Logger.Log("###FLAG 24");
 
                     if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
                     {
-                        Rocket.Core.Logging.Logger.Log("###FLAG 25");
-
                         PluginAdvertising.Get().AddPlugin(typeof(Startup).Namespace);
-                        Rocket.Core.Logging.Logger.Log("###FLAG 26");
-
                     }
 
-                    Rocket.Core.Logging.Logger.Log("###FLAG 27");
-
-                    if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
+                    if (Configuration.Instance.DisplayPluginsInServerPluginsMenu)
                     {
-                        Rocket.Core.Logging.Logger.Log("###FLAG 28");
-
-                        PluginAdvertising.Get().AddPlugins(enabledPlugins);
-                        Rocket.Core.Logging.Logger.Log("###FLAG 29");
-
+                        foreach (UntStudioPlugin plugin in Configuration.Instance.UntStudioPlugins.Where(p => p.Enabled))
+                        {
+                            PluginAdvertising.Get().AddPlugin(plugin.Name);
+                        }
                     }
-                    Rocket.Core.Logging.Logger.Log("###FLAG 31");
-
                 }
-                Rocket.Core.Logging.Logger.Log("###FLAG 32");
             }
             catch (Exception ex)
             {
                 Rocket.Core.Logging.Logger.LogException(ex, "An error ocurred while loading bootsrapper!");
             }
-            Rocket.Core.Logging.Logger.Log("###FLAG 33");
         }
 
 
 
         private string translateServerResponse(CodeResponse code)
         {
-            Rocket.Core.Logging.Logger.Log("###FLAG 100");
-
             return code switch
             {
                 CodeResponse.None                                                            => "Nothing.",

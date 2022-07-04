@@ -15,13 +15,16 @@ namespace UntStudio.Server.Controllers;
 
 public sealed class AdminController : ControllerBase
 {
-    private readonly PluginsDatabaseContext database;
+    private readonly PluginSubscriptionsDatabaseContext pluginsDatabase;
+
+    private readonly AdminsDatabaseContext adminsDatabase;
 
 
 
-    public AdminController(PluginsDatabaseContext database)
+    public AdminController(PluginSubscriptionsDatabaseContext pluginsDatabase, AdminsDatabaseContext adminsDatabase)
     {
-        this.database = database;
+        this.pluginsDatabase = pluginsDatabase;
+        this.adminsDatabase = adminsDatabase;
     }
 
 
@@ -41,6 +44,23 @@ public sealed class AdminController : ControllerBase
         if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
         {
             return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
         }
 
         string key = keyStringValue.ToString();
@@ -64,8 +84,8 @@ public sealed class AdminController : ControllerBase
         }
 
         PluginSubscription plugin = new PluginSubscription(name, key, allowedAddresses, DateTime.Now.AddDays(days));
-        this.database.Data.Add(plugin);
-        this.database.SaveChangesAsync();
+        this.pluginsDatabase.Data.Add(plugin);
+        this.pluginsDatabase.SaveChangesAsync();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
@@ -85,6 +105,23 @@ public sealed class AdminController : ControllerBase
         if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
         {
             return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
         }
 
         string key = keyStringValue.ToString();
@@ -109,8 +146,8 @@ public sealed class AdminController : ControllerBase
 
         PluginSubscription plugin = new PluginSubscription(name, key, allowedAddresses);
         plugin.SetFree();
-        this.database.Data.Add(plugin);
-        this.database.SaveChanges();
+        this.pluginsDatabase.Data.Add(plugin);
+        this.pluginsDatabase.SaveChanges();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
@@ -132,6 +169,23 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
         string key = keyStringValue.ToString();
         key.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -152,7 +206,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.database.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -164,8 +218,8 @@ public sealed class AdminController : ControllerBase
         }
 
         plugin.SetBan();
-        this.database.Data.Update(plugin);
-        this.database.SaveChanges();
+        this.pluginsDatabase.Data.Update(plugin);
+        this.pluginsDatabase.SaveChanges();
 
         return Ok();
     }
@@ -187,6 +241,23 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
         string key = keyStringValue.ToString();
         key.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -198,7 +269,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.database.Data.Where(p => p.Key.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.Key.Equals(key));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -209,8 +280,8 @@ public sealed class AdminController : ControllerBase
             plugin.SetBan();
         }
 
-        this.database.Data.UpdateRange(plugins);
-        this.database.SaveChanges();
+        this.pluginsDatabase.Data.UpdateRange(plugins);
+        this.pluginsDatabase.SaveChanges();
 
         return Ok();
     }
@@ -232,6 +303,23 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
         string key = keyStringValue.ToString();
         key.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -243,15 +331,15 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        PluginSubscription plugin = this.database.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
         }
 
         plugin.SetUnban();
-        this.database.Data.Update(plugin);
-        this.database.SaveChanges();
+        this.pluginsDatabase.Data.Update(plugin);
+        this.pluginsDatabase.SaveChanges();
 
         return Ok();
     }
@@ -273,6 +361,23 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
         string key = keyStringValue.ToString();
         key.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -284,7 +389,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.database.Data.Where(p => p.Key.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.Key.Equals(key));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -295,8 +400,8 @@ public sealed class AdminController : ControllerBase
             plugin.SetUnban();
         }
 
-        this.database.Data.UpdateRange(plugins);
-        this.database.SaveChanges();
+        this.pluginsDatabase.Data.UpdateRange(plugins);
+        this.pluginsDatabase.SaveChanges();
 
         return Ok();
     }
@@ -316,6 +421,23 @@ public sealed class AdminController : ControllerBase
         if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
         {
             return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
         }
 
         string key = keyStringValue.ToString();
@@ -338,7 +460,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.database.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -364,6 +486,23 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
         string key = keyStringValue.ToString();
         key.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -375,6 +514,38 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        return Ok(JsonConvert.SerializeObject(this.database.Data.Where(p => p.Key.Equals(key))));
+        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.Key.Equals(key))));
+    }
+
+    public IActionResult GetAllSubscriptions()
+    {
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
+            a.Login.Equals(adminLoginStringValue.ToString())
+            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
+        }
+
+        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.ToList()));
     }
 }

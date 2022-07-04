@@ -31,39 +31,25 @@ namespace UntStudio.Loader.Servers
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
             webClient.Headers.Add("Key", key);
 
-            this.logging.Log("SERVER LOADER FLAGS: #0");
             string responseText = null;
             try
             {
-                this.logging.Log("SERVER LOADER FLAGS: #1");
-   
                 responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest, name)));
-
-                this.logging.Log("SERVER LOADER FLAGS: #2");
-
                 RequestResponse response = null;
-                this.logging.Log("SERVER LOADER FLAGS: #3");
-
                 if (responseText != null)
                 {
-                    this.logging.Log("SERVER LOADER FLAGS: #3.0, text: " + responseText);
                     if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
                     {
-                        this.logging.Log("SERVER LOADER FLAGS: #4");
                         return new ServerResult(response);
                     }
                 }
-
-                this.logging.Log("SERVER LOADER FLAGS: #5");
             }
             catch (JsonReaderException)
             {
                 if (responseText != null)
                 {
-                    this.logging.Log("SERVER LOADER FLAGS: #6");
                     return new ServerResult(Convert.FromBase64String(responseText));
                 }
-                this.logging.Log("SERVER LOADER FLAGS: #7");
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
@@ -96,7 +82,6 @@ namespace UntStudio.Loader.Servers
             {
                 this.logging.LogError(ex, "An error occured while getting plugin!");
             }
-            this.logging.Log("SERVER LOADER FLAGS: #8");
             return new ServerResult();
         }
     }

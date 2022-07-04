@@ -10,7 +10,6 @@ namespace UntStudio.Bootstrapper
 {
     internal sealed class Bootstrapper : IBootstrapper
     {
-        //private const string UnloadLoaderRequest = "https://localhost:7192/bootstrapper/unloadLoader";
         private const string GetUnloadLoaderRequest = "https://localhost:5001/bootstrapper/unloadLoader";
         
         private const string GetLoaderEntryPointRequest = "https://localhost:5001/bootstrapper/getloaderentrypoint";
@@ -23,33 +22,21 @@ namespace UntStudio.Bootstrapper
 
         public async Task<ServerResult> GetUnloadLoaderAsync(string key)
         {
-            Rocket.Core.Logging.Logger.Log("FLAG #1");
             WebClient webClient = new WebClient();
-            Rocket.Core.Logging.Logger.Log("FLAG #2");
 
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            Rocket.Core.Logging.Logger.Log("FLAG #3");
             webClient.Headers.Add("Key", key);
-            Rocket.Core.Logging.Logger.Log("FLAG #4");
 
             string responseText = null;
             try
             {
-                Rocket.Core.Logging.Logger.Log("FLAG #5");
-                //string responseText = await webClient.DownloadStringTaskAsync(UnloadLoaderRequest);
                 responseText = await webClient.DownloadStringTaskAsync(GetUnloadLoaderRequest);
-                Rocket.Core.Logging.Logger.Log("FLAG #6");
                 RequestResponse response = null;
-                Rocket.Core.Logging.Logger.Log("FLAG #7");
 
-                Rocket.Core.Logging.Logger.Log("Response text: " + responseText);
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
                 {
-                    Rocket.Core.Logging.Logger.Log("FLAG #8");
-
                     return new ServerResult(response);
                 }
-                Rocket.Core.Logging.Logger.Log("FLAG #10");
             }
             catch (JsonReaderException)
             {
@@ -86,41 +73,27 @@ namespace UntStudio.Bootstrapper
             }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, $"An error occured while getting loader.");
             }
-            Rocket.Core.Logging.Logger.Log("FLAG #11");
             return null;
         }
 
         public async Task<ServerResult> GetLoaderEntryPointAsync(string key)
         {
-            Rocket.Core.Logging.Logger.Log("FLAG #0.1");
-
             WebClient webClient = new WebClient();
-            Rocket.Core.Logging.Logger.Log("FLAG #0.2");
 
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            Rocket.Core.Logging.Logger.Log("FLAG #0.3");
-
             webClient.Headers.Add("Key", key);
-            Rocket.Core.Logging.Logger.Log("FLAG #0.4");
 
             string responseText = null;
             try
             {
-                Rocket.Core.Logging.Logger.Log("FLAG #0.5");
                 responseText = await webClient.DownloadStringTaskAsync(GetLoaderEntryPointRequest);
-                Rocket.Core.Logging.Logger.Log("FLAG #0.6");
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.7");
-                Rocket.Core.Logging.Logger.Log("Response text in entry point: " + responseText);
                 LoaderEntryPoint loaderEntryPoint = null;
                 if ((loaderEntryPoint = JsonConvert.DeserializeObject<LoaderEntryPoint>(responseText)) != null)
                 {
                     return new ServerResult(loaderEntryPoint);
                 }
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.9");
             }
             catch (JsonReaderException)
             {
@@ -129,50 +102,35 @@ namespace UntStudio.Bootstrapper
                     RequestResponse response = null;
                     if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
                     {
-                        Rocket.Core.Logging.Logger.Log("FLAG #0.8");
-
                         return new ServerResult(response);
                     }
                 }
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
                 return new ServerResult(response.StatusCode);
             }
             catch (WebException ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
-            Rocket.Core.Logging.Logger.Log("FLAG #0.10");
             return null;
         }
 
         public async Task<ServerResult> PutBlockPluginAsync(string key, string name)
         {
-            Rocket.Core.Logging.Logger.Log("FLAG #0.1");
-
             WebClient webClient = new WebClient();
-            Rocket.Core.Logging.Logger.Log("FLAG #0.2");
-
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            Rocket.Core.Logging.Logger.Log("FLAG #0.3");
-
             webClient.Headers.Add("Key", key);
-            Rocket.Core.Logging.Logger.Log("FLAG #0.4");
 
             try
             {
-                Rocket.Core.Logging.Logger.Log("FLAG #0.5");
                 string responseText = await webClient.DownloadStringTaskAsync(string.Format(PutBlockPluginRequest, name));
-                Rocket.Core.Logging.Logger.Log("FLAG #0.6");
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.7");
-                Rocket.Core.Logging.Logger.Log("Response text in entry point: " + responseText);
                 if (responseText != null)
                 {
                     RequestResponse response = null;
@@ -181,48 +139,32 @@ namespace UntStudio.Bootstrapper
                         return new ServerResult(response);
                     }
                 }
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.9");
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
                 return new ServerResult(response.StatusCode);
             }
             catch (WebException ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
-            Rocket.Core.Logging.Logger.Log("FLAG #0.10");
             return null;
         }
 
         public async Task<ServerResult> PutUnblockPluginAsync(string key, string name)
         {
-            Rocket.Core.Logging.Logger.Log("FLAG #0.1");
-
             WebClient webClient = new WebClient();
-            Rocket.Core.Logging.Logger.Log("FLAG #0.2");
-
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            Rocket.Core.Logging.Logger.Log("FLAG #0.3");
-
             webClient.Headers.Add("Key", key);
-            Rocket.Core.Logging.Logger.Log("FLAG #0.4");
 
             try
             {
-                Rocket.Core.Logging.Logger.Log("FLAG #0.5");
                 string responseText = await webClient.DownloadStringTaskAsync(string.Format(PutUnblockPluginRequest, name));
-                Rocket.Core.Logging.Logger.Log("FLAG #0.6");
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.7");
-                Rocket.Core.Logging.Logger.Log("Response text in entry point: " + responseText);
-
                 if (responseText != null)
                 {
                     RequestResponse response = null;
@@ -231,23 +173,20 @@ namespace UntStudio.Bootstrapper
                         return new ServerResult(response);
                     }
                 }
-
-                Rocket.Core.Logging.Logger.Log("FLAG #0.9");
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
                 return new ServerResult(response.StatusCode);
             }
             catch (WebException ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.Log($"An error occured while getting loader. {ex}");
+                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
             }
-            Rocket.Core.Logging.Logger.Log("FLAG #0.10");
             return null;
         }
     }

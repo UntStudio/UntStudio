@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UntStudio.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDatabaseMigration : Migration
+    public partial class PluginSubscriptionsDatabaseInitMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

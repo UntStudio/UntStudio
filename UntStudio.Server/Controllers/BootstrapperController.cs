@@ -15,13 +15,13 @@ namespace UntStudio.Server.Controllers;
 
 public sealed class BootstrapperController : ControllerBase
 {
-    private readonly PluginsDatabaseContext database;
+    private readonly PluginSubscriptionsDatabaseContext database;
 
     private readonly IConfiguration configuration;
 
 
 
-    public BootstrapperController(PluginsDatabaseContext database, IConfiguration configuration)
+    public BootstrapperController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration)
     {
         this.database = database;
         this.configuration = configuration;

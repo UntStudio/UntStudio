@@ -1,24 +1,23 @@
-﻿namespace UntStudio.Server.Models
+﻿namespace UntStudio.Server.Models;
+
+public class LoaderEntryPoint
 {
-    public class LoaderEntryPoint
+    public string Namespace;
+
+    public string Class;
+
+    public string Method;
+
+
+
+    public LoaderEntryPoint(string @namespace, string @class, string method)
     {
-        public string Namespace;
+        Namespace = @namespace;
+        Class = @class;
+        Method = method;
+    }
 
-        public string Class;
-
-        public string Method;
-
-
-
-        public LoaderEntryPoint(string @namespace, string @class, string method)
-        {
-            Namespace = @namespace;
-            Class = @class;
-            Method = method;
-        }
-
-        public LoaderEntryPoint()
-        {
-        }
+    public LoaderEntryPoint()
+    {
     }
 }

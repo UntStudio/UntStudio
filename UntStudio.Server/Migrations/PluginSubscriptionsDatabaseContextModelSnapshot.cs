@@ -10,8 +10,8 @@ using UntStudio.Server.Data;
 
 namespace UntStudio.Server.Migrations
 {
-    [DbContext(typeof(PluginsDatabaseContext))]
-    partial class PluginsDatabaseContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PluginSubscriptionsDatabaseContext))]
+    partial class PluginSubscriptionsDatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
