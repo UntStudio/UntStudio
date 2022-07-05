@@ -9,9 +9,9 @@ namespace UntStudio.Loader.Logging
             Console.WriteLine(message);
         }
 
-        public void LogError(Exception ex, string message)
+        public void LogException(Exception ex, string message)
         {
-            Log($"[ERROR]: {message} Info: {ex}");
+            Log($"[EXCEPTION]: {message} Info: {ex}");
         }
     }
 }

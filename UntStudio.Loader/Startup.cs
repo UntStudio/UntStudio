@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UntStudio.Loader.API;
-using UntStudio.Loader.Loaders;
+using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
@@ -38,7 +38,6 @@ namespace UntStudio.Loader
                 }
                 if (serverResult.HasBytes)
                 {
-                    logging.Log($"Loading plugin: {configuration.Plugins[i]}.");
                     try
                     {
                         unsafe
@@ -80,14 +79,13 @@ namespace UntStudio.Loader
                                 });
 
                                 Object.DontDestroyOnLoad(containerGameObject);
-                                logging.Log($"Loaded plugin {configuration.Plugins[i]}.");
                                 PluginAdvertising.Get().AddPlugin(configuration.Plugins[i]);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        logging.LogError(ex, $"An not supported error ocurred while loading plugin, please contant with Administrators! Plugin: {configuration.Plugins[i]}.");
+                        logging.LogException(ex, $"An not supported error ocurred while loading plugin, please contant with Administrators! Plugin: {configuration.Plugins[i]}.");
                         continue;
                     }
                 }

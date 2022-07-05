@@ -14,17 +14,13 @@ namespace UntStudio.Bootstrapper
         
         private const string GetLoaderEntryPointRequest = "https://localhost:5001/bootstrapper/getloaderentrypoint";
 
-        private const string PutBlockPluginRequest = "https://localhost:5001/pluginsubscriptions/block?name={0}";
-
-        private const string PutUnblockPluginRequest = "https://localhost:5001/pluginsubscriptions/unblock?name={0}";
-
 
 
         public async Task<ServerResult> GetUnloadLoaderAsync(string key)
         {
             WebClient webClient = new WebClient();
 
-            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
+            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
             webClient.Headers.Add("Key", key);
 
             string responseText = null;
@@ -82,7 +78,7 @@ namespace UntStudio.Bootstrapper
         {
             WebClient webClient = new WebClient();
 
-            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
+            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
             webClient.Headers.Add("Key", key);
 
             string responseText = null;
@@ -97,74 +93,6 @@ namespace UntStudio.Bootstrapper
             }
             catch (JsonReaderException)
             {
-                if (responseText != null)
-                {
-                    RequestResponse response = null;
-                    if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
-                    {
-                        return new ServerResult(response);
-                    }
-                }
-            }
-            catch (WebException ex) when (ex.Response is HttpWebResponse response)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-                return new ServerResult(response.StatusCode);
-            }
-            catch (WebException ex)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-            }
-            catch (Exception ex)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-            }
-            return null;
-        }
-
-        public async Task<ServerResult> PutBlockPluginAsync(string key, string name)
-        {
-            WebClient webClient = new WebClient();
-            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            webClient.Headers.Add("Key", key);
-
-            try
-            {
-                string responseText = await webClient.DownloadStringTaskAsync(string.Format(PutBlockPluginRequest, name));
-                if (responseText != null)
-                {
-                    RequestResponse response = null;
-                    if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
-                    {
-                        return new ServerResult(response);
-                    }
-                }
-            }
-            catch (WebException ex) when (ex.Response is HttpWebResponse response)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-                return new ServerResult(response.StatusCode);
-            }
-            catch (WebException ex)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-            }
-            catch (Exception ex)
-            {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
-            }
-            return null;
-        }
-
-        public async Task<ServerResult> PutUnblockPluginAsync(string key, string name)
-        {
-            WebClient webClient = new WebClient();
-            webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
-            webClient.Headers.Add("Key", key);
-
-            try
-            {
-                string responseText = await webClient.DownloadStringTaskAsync(string.Format(PutUnblockPluginRequest, name));
                 if (responseText != null)
                 {
                     RequestResponse response = null;

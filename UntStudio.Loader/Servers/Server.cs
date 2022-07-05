@@ -55,7 +55,7 @@ namespace UntStudio.Loader.Servers
             {
                 if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
-                    this.logging.LogError(ex, "License server is down, sorry about that.");
+                    this.logging.LogException(ex, "License server is down, sorry about that.");
                 }
 
                 if (response.StatusCode == HttpStatusCode.NotFound)
@@ -80,7 +80,7 @@ namespace UntStudio.Loader.Servers
             }
             catch (Exception ex)
             {
-                this.logging.LogError(ex, "An error occured while getting plugin!");
+                this.logging.LogException(ex, "An error occured while getting plugin!");
             }
             return new ServerResult();
         }

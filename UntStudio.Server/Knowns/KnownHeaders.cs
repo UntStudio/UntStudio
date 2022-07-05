@@ -10,5 +10,7 @@ public static class KnownHeaders
 
     public const string UserAgentLoaderValue = "UntStudio.Loader";
 
+    public const string UserAgentBootstrapperValue = "UntStudio.Bootstrapper";
+
     public const string UserAgentAdminValue = "UntStudio.Admin";
 }

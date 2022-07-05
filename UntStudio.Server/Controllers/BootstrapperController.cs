@@ -31,24 +31,18 @@ public sealed class BootstrapperController : ControllerBase
 
     public IActionResult UnloadLoader()
     {
-        Console.WriteLine("----------------------------------LOCAL IP ADDRESS: " + HttpContext.Connection.LocalIpAddress.ToString());
-        Console.WriteLine("----------------------------------REMOTE IP ADDRESS: " + HttpContext.Connection.RemoteIpAddress.ToString());
-        Console.WriteLine("----------------------------------REMOTE IP MapToIPv4 ADDRESS: " + HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString());
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("unload loader------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
-            Console.WriteLine("unload loader------------------------Errore #2!");
             return BadRequest();
         }
 
-        if (userAgentStringValue != KnownHeaders.UserAgentLoaderValue)
+        if (userAgentStringValue != KnownHeaders.UserAgentBootstrapperValue)
         {
-            Console.WriteLine("unload loader------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -60,7 +54,6 @@ public sealed class BootstrapperController : ControllerBase
 
         if (keyStringValidator.Failed)
         {
-            Console.WriteLine("Errore #4!");
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
         }
 
@@ -103,19 +96,16 @@ public sealed class BootstrapperController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("loader entry point------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
-            Console.WriteLine("loader entry point------------------------Errore #2!");
             return BadRequest();
         }
 
-        if (userAgentStringValue != KnownHeaders.UserAgentLoaderValue)
+        if (userAgentStringValue != KnownHeaders.UserAgentBootstrapperValue)
         {
-            Console.WriteLine("loader entry point------------------------Errore #3!");
             return BadRequest();
         }
 

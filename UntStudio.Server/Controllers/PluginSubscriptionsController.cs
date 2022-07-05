@@ -38,19 +38,16 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("UnloadPlugin------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
-            Console.WriteLine("UnloadPlugin------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
-            Console.WriteLine("UnloadPlugin------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -144,19 +141,16 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("Block------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
-            Console.WriteLine("Block------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
-            Console.WriteLine("Block------------------------Errore #3!");
             return BadRequest();
         }
 
@@ -254,19 +248,16 @@ public sealed class PluginSubscriptionsController : ControllerBase
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
-            Console.WriteLine("Unblock------------------------Errore #1!");
             return BadRequest();
         }
 
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues agentStringValue) == false)
         {
-            Console.WriteLine("Unblock------------------------Errore #2!");
             return BadRequest();
         }
 
         if (agentStringValue != KnownHeaders.UserAgentLoaderValue)
         {
-            Console.WriteLine("Unblock------------------------Errore #3!");
             return BadRequest();
         }
 

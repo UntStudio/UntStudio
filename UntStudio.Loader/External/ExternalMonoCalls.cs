@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace UntStudio.Loader.Loaders
+namespace UntStudio.Loader.External
 {
     internal sealed class ExternalMonoCalls
     {

@@ -1,6 +1,6 @@
 ﻿namespace UntStudio.Bootstrapper.Models
 {
-    public class LoaderEntryPoint
+    internal class LoaderEntryPoint
     {
         public string Namespace;
 
@@ -15,10 +15,6 @@
             Namespace = @namespace;
             Class = @class;
             Method = method;
-        }
-
-        public LoaderEntryPoint()
-        {
         }
     }
 }

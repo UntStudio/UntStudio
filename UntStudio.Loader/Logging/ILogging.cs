@@ -6,6 +6,6 @@ namespace UntStudio.Loader.Logging
     {
         void Log(string message);
 
-        void LogError(Exception ex, string message);
+        void LogException(Exception ex, string message);
     }
 }

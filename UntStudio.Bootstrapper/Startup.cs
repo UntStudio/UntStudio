@@ -1,55 +1,58 @@
-﻿using Rocket.Core.Plugins;
+﻿using Newtonsoft.Json;
+using Rocket.Core.Plugins;
 using SDG.Unturned;
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UntStudio.Bootstrapper.API;
-using UntStudio.Bootstrapper.Loaders;
+using UntStudio.Bootstrapper.External;
 using UntStudio.Bootstrapper.Models;
 using static UntStudio.Bootstrapper.API.RequestResponse;
 
 namespace UntStudio.Bootstrapper
 {
-    internal sealed class Startup : RocketPlugin<BootstrapperConfiguration>
+    internal sealed class Startup : RocketPlugin
     {
         protected override async void Load()
         {
             try
             {
+                Configuration configuration = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Path.Combine(
+                    Rocket.Core.Environment.PluginsDirectory, 
+                    typeof(Startup).Namespace,
+                    "config.json")));
                 IBootstrapper bootstrapper = new Bootstrapper();
-                ServerResult loaderServerResult = await bootstrapper.GetUnloadLoaderAsync(Configuration.Instance.Key);
+                ServerResult loaderServerResult = await bootstrapper.GetUnloadLoaderAsync(configuration.LicenseKey);
 
                 if (loaderServerResult == null)
                 {
-                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
                     return;
                 }
 
                 if (loaderServerResult.HasResponse)
                 {
-                    Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
                     Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderServerResult.Response.Code));
                     return;
                 }
 
-                ServerResult loaderEntryPointServerResult = await bootstrapper.GetLoaderEntryPointAsync(Configuration.Instance.Key);
-
+                ServerResult loaderEntryPointServerResult = await bootstrapper.GetLoaderEntryPointAsync(configuration.LicenseKey);
                 if (loaderEntryPointServerResult == null)
                 {
-                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
                     return;
                 }
 
                 if (loaderEntryPointServerResult.HasResponse)
                 {
-                    Rocket.Core.Logging.Logger.LogWarning("You have a new response from server!");
                     Rocket.Core.Logging.Logger.LogWarning(translateServerResponse(loaderEntryPointServerResult.Response.Code));
                     return;
                 }
 
                 if (loaderEntryPointServerResult.HasLoaderEntryPoint == false)
                 {
-                    Rocket.Core.Logging.Logger.Log("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
                     return;
                 }
 
@@ -69,8 +72,9 @@ namespace UntStudio.Bootstrapper
                             IntPtr methodHandle = ExternalMonoCalls.MonoClassGetMethodFromName(classHandle,
                                 loaderEntryPointServerResult.LoaderEntryPoint.Method, 1);
 
-                            string pluginsFormatted = string.Join(",", Configuration.Instance.UntStudioPlugins.Select(p => p.Name));
-                            string formattedShowPluginKeyPluginsText = $"{Configuration.Instance.DisplayPluginsInServerPluginsMenu};{Configuration.Instance.Key};{pluginsFormatted}";
+                            string pluginsFormatted = string.Join(",", configuration.Plugins.Where(p => p.Value == true)
+                                .Select(p => p.Key));
+                            string formattedShowPluginKeyPluginsText = $"{configuration.ShowPluginsInServerMenu};{configuration.LicenseKey};{pluginsFormatted}";
                             string[] array = new string[]
                             {
                                 formattedShowPluginKeyPluginsText,
@@ -78,19 +82,6 @@ namespace UntStudio.Bootstrapper
 
                             IntPtr arrayHandle = Marshal.UnsafeAddrOfPinnedArrayElement(array, 0);
                             ExternalMonoCalls.MonoRuntimeInvoke(methodHandle, IntPtr.Zero, arrayHandle, IntPtr.Zero);
-                        }
-                    }
-
-                    if (Configuration.Instance.DisplayLoaderInServerPluginsMenu)
-                    {
-                        PluginAdvertising.Get().AddPlugin(typeof(Startup).Namespace);
-                    }
-
-                    if (Configuration.Instance.DisplayPluginsInServerPluginsMenu)
-                    {
-                        foreach (UntStudioPlugin plugin in Configuration.Instance.UntStudioPlugins.Where(p => p.Enabled))
-                        {
-                            PluginAdvertising.Get().AddPlugin(plugin.Name);
                         }
                     }
                 }
