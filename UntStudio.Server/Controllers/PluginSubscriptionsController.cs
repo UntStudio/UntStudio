@@ -9,7 +9,6 @@ using System.Linq;
 using UntStudio.Server.Data;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
-using UntStudio.Server.Repositories;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.RequestResponse;
 
@@ -21,20 +20,17 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
     private readonly IConfiguration configuration;
 
-    private readonly IHashesVerifierRepository loaderHashesVerifierRepository;
 
 
-
-    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IHashesVerifierRepository loaderHashesVerifierRepository)
+    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration)
     {
         this.database = database;
         this.configuration = configuration;
-        this.loaderHashesVerifierRepository = loaderHashesVerifierRepository;
     }
 
 
 
-    public IActionResult Unload(/*byte[] loaderBytes, */string name)
+    public IActionResult Unload(string name)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
         {
@@ -50,11 +46,6 @@ public sealed class PluginSubscriptionsController : ControllerBase
         {
             return BadRequest();
         }
-
-        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
-        {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
-        }*/
 
         string key = keyStringValue.ToString();
         key.Rules()
@@ -153,11 +144,6 @@ public sealed class PluginSubscriptionsController : ControllerBase
         {
             return BadRequest();
         }
-
-        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
-        {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
-        }*/
 
         string key = keyStringValue.ToString();
         key.Rules()
@@ -260,11 +246,6 @@ public sealed class PluginSubscriptionsController : ControllerBase
         {
             return BadRequest();
         }
-
-        /*if (this.loaderHashesVerifierRepository.Verify(loaderBytes) == false)
-        {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.VersionOutdated)));
-        }*/
 
         string key = keyStringValue.ToString();
         key.Rules()
