@@ -61,6 +61,11 @@ namespace UntStudio.Bootstrapper
                     {
                         fixed (byte* pointer = loaderServerResult.Bytes)
                         {
+                            if (AppDomain.CurrentDomain.GetAssemblies().First(a => a.FullName.StartsWith(typeof(Startup).Namespace)) != null)
+                            {
+                                Rocket.Core.Logging.Logger.LogWarning("Already loaded!");
+                                return;
+                            }
                             IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, false, out _);
                             ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
 
