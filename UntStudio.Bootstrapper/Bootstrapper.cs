@@ -16,12 +16,11 @@ namespace UntStudio.Bootstrapper
 
 
 
-        public async Task<ServerResult> GetUnloadLoaderAsync(string key)
+        public async Task<ServerResult> GetUnloadLoaderAsync(string licenseKey)
         {
             WebClient webClient = new WebClient();
-
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
-            webClient.Headers.Add("Key", key);
+            webClient.Headers.Add("LicenseKey", licenseKey);
 
             string responseText = null;
             try
@@ -74,12 +73,12 @@ namespace UntStudio.Bootstrapper
             return null;
         }
 
-        public async Task<ServerResult> GetLoaderEntryPointAsync(string key)
+        public async Task<ServerResult> GetLoaderEntryPointAsync(string licenseKey)
         {
             WebClient webClient = new WebClient();
 
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
-            webClient.Headers.Add("Key", key);
+            webClient.Headers.Add("LicenseKey", licenseKey);
 
             string responseText = null;
             try

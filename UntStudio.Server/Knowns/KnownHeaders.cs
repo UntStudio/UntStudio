@@ -2,7 +2,7 @@
 
 public static class KnownHeaders
 {
-    public const string Key = nameof(Key);
+    public const string LicenseKey = nameof(LicenseKey);
 
     public const string AdminLogin = nameof(AdminLogin);
 

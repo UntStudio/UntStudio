@@ -1,11 +1,10 @@
-﻿namespace UntStudio.Loader.Services
+﻿namespace UntStudio.Loader.Services;
+
+public interface ILoaderConfiguration
 {
-    public interface ILoaderConfiguration
-    {
-        bool ShowPlugins { get; }
+    bool ShowPlugins { get; }
 
-        string Key { get; }
+    string LicenseKey { get; }
 
-        string[] Plugins { get; }
-    }
+    string[] Plugins { get; }
 }

@@ -2,14 +2,13 @@
 using System;
 using UntStudio.Loader.Logging;
 
-namespace UntStudio.Loader.Services
+namespace UntStudio.Loader.Services;
+
+internal interface ILoaderBuilder
 {
-    internal interface ILoaderBuilder
-    {
-        IServiceCollection Services { get; }
+    IServiceCollection Services { get; }
 
-        IServiceCollection AddLogging(ILogging logger);
+    IServiceCollection AddLogging(ILogging logger);
 
-        IServiceProvider Build();
-    }
+    IServiceProvider Build();
 }

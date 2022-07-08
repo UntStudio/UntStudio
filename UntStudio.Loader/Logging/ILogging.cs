@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace UntStudio.Loader.Logging
-{
-    public interface ILogging
-    {
-        void Log(string message);
+namespace UntStudio.Loader.Logging;
 
-        void LogException(Exception ex, string message);
-    }
+public interface ILogging
+{
+    void Log(string message);
+
+    void LogException(Exception ex, string message);
 }

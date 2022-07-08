@@ -1,35 +1,34 @@
-﻿namespace UntStudio.Loader.API
+﻿namespace UntStudio.Loader.API;
+
+public class RequestResponse
 {
-    public class RequestResponse
+    public CodeResponse Code;
+
+
+
+    public RequestResponse(CodeResponse code)
     {
-        public CodeResponse Code;
+        Code = code;
+    }
+
+    public RequestResponse()
+    {
+    }
 
 
 
-        public RequestResponse(CodeResponse code)
-        {
-            Code = code;
-        }
-
-        public RequestResponse()
-        {
-        }
-
-
-
-        public enum CodeResponse
-        {
-            None,
-            VersionOutdated,
-            KeyValidationFailed,
-            NameValidationFailed,
-            SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound,
-            SpecifiedKeyOrIPNotBindedOrNameNotFound,
-            SubscriptionBanned,
-            SubscriptionExpired,
-            SubscriptionBlockedByOwner,
-            SubscriptionAlreadyBlocked,
-            SubscriptionAlreadyUnblocked,
-        }
+    public enum CodeResponse
+    {
+        None,
+        VersionOutdated,
+        LicenseKeyValidationFailed,
+        NameValidationFailed,
+        SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedLicenseKeyNotFound,
+        SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound,
+        SubscriptionBanned,
+        SubscriptionExpired,
+        SubscriptionBlockedByOwner,
+        SubscriptionAlreadyBlocked,
+        SubscriptionAlreadyUnblocked,
     }
 }

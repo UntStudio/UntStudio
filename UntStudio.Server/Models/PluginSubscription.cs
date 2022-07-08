@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
+using UntStudio.Server.Knowns;
 
 namespace UntStudio.Server.Models;
 
@@ -10,7 +11,7 @@ public class PluginSubscription
     public PluginSubscription(string name, string key, string allowedAddresses, DateTime purchaseTime, DateTime expirationTime)
     {
         Name = name;
-        Key = key;
+        LicenseKey = key;
         PurchaseTime = DateTime.ParseExact(purchaseTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
         ExpirationTime = DateTime.ParseExact(expirationTime.ToString("dd/MM/yyyy"), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
         AllowedAddresses = allowedAddresses;
@@ -37,11 +38,14 @@ public class PluginSubscription
     public string Name { get; set; }
 
     [Required]
-    [StringLength(19, MinimumLength = 19)]
-    public string Key { get; set; }
+    [StringLength(KnownPluginKeyLenghts.Lenght, MinimumLength = KnownPluginKeyLenghts.Lenght)]
+    public string LicenseKey { get; set; }
 
     [Required]
     public string AllowedAddresses { get; set; }
+
+    [Required]
+    public string HWID { get; set; }
 
     public string[] AllowedAddressesParsed => AllowedAddresses.Split(',');
 
@@ -73,7 +77,7 @@ public class PluginSubscription
     {
         TimeSpan leftTimeForExpire = ExpirationTime - DateTime.Now;
         return new StringBuilder()
-            .Append($"[{Name}>{Key}]")
+            .Append($"[{Name}>{LicenseKey}]")
             .Append($"\nId: {Id}")
             .Append($"\nPurchased: {PurchaseTime}")
             .Append($"\nExpired: {(Expired ? "Yes" : "No")}")

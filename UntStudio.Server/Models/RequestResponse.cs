@@ -21,10 +21,10 @@ public class RequestResponse
     {
         None,
         VersionOutdated,
-        KeyValidationFailed,
+        LicenseKeyValidationFailed,
         NameValidationFailed,
-        SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound,
-        SpecifiedKeyOrIPNotBindedOrNameNotFound,
+        SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedLicenseKeyNotFound,
+        SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound,
         SubscriptionBanned,
         SubscriptionExpired,
         SubscriptionBlockedByOwner,

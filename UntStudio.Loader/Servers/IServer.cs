@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using UntStudio.Loader.API;
 
-namespace UntStudio.Loader.Servers
+namespace UntStudio.Loader.Servers;
+
+public interface IServer
 {
-    public interface IServer
-    {
-        Task<ServerResult> GetUnloadPluginAsync(string key, string name, CancellationToken cancellationToken = default);
-    }
+    Task<ServerResult> GetUnloadPluginAsync(string licenseKey, string name, CancellationToken cancellationToken = default);
 }

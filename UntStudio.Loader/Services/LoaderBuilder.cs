@@ -2,35 +2,34 @@
 using System;
 using UntStudio.Loader.Logging;
 
-namespace UntStudio.Loader.Services
+namespace UntStudio.Loader.Services;
+
+internal sealed class LoaderBuilder : ILoaderBuilder
 {
-    internal sealed class LoaderBuilder : ILoaderBuilder
+    public LoaderBuilder()
     {
-        public LoaderBuilder()
+        Services = new ServiceCollection();
+    }
+
+
+
+    public IServiceCollection Services { get; }
+
+
+
+    public IServiceCollection AddLogging(ILogging logger)
+    {
+        if (logger == null)
         {
-            Services = new ServiceCollection();
+            throw new ArgumentNullException(nameof(logger));
         }
 
+        Services.AddSingleton(logger);
+        return Services;
+    }
 
-
-        public IServiceCollection Services { get; }
-
-
-
-        public IServiceCollection AddLogging(ILogging logger)
-        {
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            Services.AddSingleton(logger);
-            return Services;
-        }
-
-        public IServiceProvider Build()
-        {
-            return Services.BuildServiceProvider();
-        }
+    public IServiceProvider Build()
+    {
+        return Services.BuildServiceProvider();
     }
 }

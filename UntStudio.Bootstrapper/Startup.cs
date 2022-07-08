@@ -103,17 +103,17 @@ namespace UntStudio.Bootstrapper
         {
             return code switch
             {
-                CodeResponse.None                                                            => "Nothing.",
-                CodeResponse.VersionOutdated                                                 => "Loader version outdated, please download latest!",
-                CodeResponse.KeyValidationFailed                                             => "Please, check your key, and write it properly!",
-                CodeResponse.NameValidationFailed                                            => "Plugin name validation failed, please verify your plugin configuration.",
-                CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound  => "Your subscription banned or IP not binded or expired or specified key not found.",
-                CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound                         => "Your key is not binded or key does not exist or plugin name not found.",
-                CodeResponse.SubscriptionBanned                                              => "Your subscription was banned.",
-                CodeResponse.SubscriptionExpired                                             => "Your subscription was expired.",
-                CodeResponse.SubscriptionBlockedByOwner                                      => "Your subscription was blocked by yourself, and cannot be used.",
-                CodeResponse.SubscriptionAlreadyBlocked                                      => "Your subscription was already blocked by yourself.",
-                CodeResponse.SubscriptionAlreadyUnblocked                                    => "Your subscription was already unblocked by yourself.",
+                CodeResponse.None                                                                  => "Nothing.",
+                CodeResponse.VersionOutdated                                                       => "Loader version outdated, please download latest!",
+                CodeResponse.LicenseKeyValidationFailed                                            => "Please, check your license key, and write it properly!",
+                CodeResponse.NameValidationFailed                                                  => "Plugin name validation failed, please verify your plugin configuration.",
+                CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedLicenseKeyNotFound => "Your subscription banned or IP not binded or expired or specified license key not found.",
+                CodeResponse.SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound                        => "Your license key is not binded or license key does not exist or plugin name not found.",
+                CodeResponse.SubscriptionBanned                                                    => "Your subscription was banned.",
+                CodeResponse.SubscriptionExpired                                                   => "Your subscription was expired.",
+                CodeResponse.SubscriptionBlockedByOwner                                            => "Your subscription was blocked by yourself, and cannot be used.",
+                CodeResponse.SubscriptionAlreadyBlocked                                            => "Your subscription was already blocked by yourself.",
+                CodeResponse.SubscriptionAlreadyUnblocked                                          => "Your subscription was already unblocked by yourself.",
                 _ => "Unknown server response, please contact with Administrator, may version is outdated.",
             };
         }

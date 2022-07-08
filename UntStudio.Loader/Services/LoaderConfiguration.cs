@@ -1,20 +1,19 @@
-﻿namespace UntStudio.Loader.Services
+﻿namespace UntStudio.Loader.Services;
+
+internal sealed class LoaderConfiguration : ILoaderConfiguration
 {
-    internal sealed class LoaderConfiguration : ILoaderConfiguration
+    public bool ShowPlugins { get; }
+
+    public string LicenseKey { get; }
+
+    public string[] Plugins { get; }
+
+
+
+    public LoaderConfiguration(bool showPlugins, string licenseKey, string[] plugins)
     {
-        public bool ShowPlugins { get; }
-
-        public string Key { get; }
-
-        public string[] Plugins { get; }
-
-
-
-        public LoaderConfiguration(bool showPlugins, string key, string[] plugins)
-        {
-            ShowPlugins = showPlugins;
-            Key = key;
-            Plugins = plugins;
-        }
+        ShowPlugins = showPlugins;
+        LicenseKey = licenseKey;
+        Plugins = plugins;
     }
 }

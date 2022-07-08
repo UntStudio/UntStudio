@@ -31,7 +31,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult AddSubscription(string name, string allowedAddresses, int days)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -92,7 +92,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult AddFreeSubscription(string name, string allowedAddresses)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -154,7 +154,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult BanSubscription(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -206,7 +206,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -226,7 +226,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult BanSubscriptions()
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -269,7 +269,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.Key.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -288,7 +288,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult UnbanSubscription(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -331,7 +331,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -346,7 +346,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult UnbanSubscriptions()
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -389,7 +389,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.Key.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -408,7 +408,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult GetSubscription(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -460,7 +460,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.Key.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -471,7 +471,7 @@ public sealed class AdminController : ControllerBase
 
     public IActionResult GetSubscriptions()
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -514,7 +514,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.Key.Equals(key))));
+        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key))));
     }
 
     public IActionResult GetAllSubscriptions()

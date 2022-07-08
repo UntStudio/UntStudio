@@ -31,7 +31,7 @@ public sealed class BootstrapperController : ControllerBase
 
     public IActionResult UnloadLoader()
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -54,7 +54,7 @@ public sealed class BootstrapperController : ControllerBase
 
         if (keyStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
         /*if (this.database.Data.ToList().Any(p => 
@@ -68,7 +68,7 @@ public sealed class BootstrapperController : ControllerBase
 
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)
+            && p.LicenseKey.Equals(p.LicenseKey)
             && p.Free))
         {
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
@@ -84,17 +84,17 @@ public sealed class BootstrapperController : ControllerBase
 
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)))
+            && p.LicenseKey.Equals(p.LicenseKey)))
         {
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
         }
 
-        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
+        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedLicenseKeyNotFound)));
     }
 
     public IActionResult GetLoaderEntryPoint()
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -117,7 +117,7 @@ public sealed class BootstrapperController : ControllerBase
 
         if (keyStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
         /*if (this.database.Data.ToList().Any(p =>
@@ -131,7 +131,7 @@ public sealed class BootstrapperController : ControllerBase
 
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)
+            && p.LicenseKey.Equals(p.LicenseKey)
             && p.Free))
         {
             return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
@@ -152,7 +152,7 @@ public sealed class BootstrapperController : ControllerBase
 
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)))
+            && p.LicenseKey.Equals(p.LicenseKey)))
         {
             return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
             (
@@ -162,6 +162,6 @@ public sealed class BootstrapperController : ControllerBase
             );
         }
 
-        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
+        return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedLicenseKeyNotFound)));
     }
 }

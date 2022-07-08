@@ -32,7 +32,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
     public IActionResult Unload(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues licenseKeyStringValue) == false)
         {
             return BadRequest();
         }
@@ -47,15 +47,15 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return BadRequest();
         }
 
-        string key = keyStringValue.ToString();
-        key.Rules()
+        string licenseKey = licenseKeyStringValue.ToString();
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
-            .Return(out IStringValidator keyStringValidator);
+            .Return(out IStringValidator licenseKeyStringValidator);
 
-        if (keyStringValidator.Failed)
+        if (licenseKeyStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
         name.Rules()
@@ -73,7 +73,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.Name.Equals(name) 
             && p.Free);*/
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -102,11 +102,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress)) 
             && p.Name.Equals(name));*/
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name));
         if (plugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound)));
         }
 
         if (plugin.Banned)
@@ -130,7 +130,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
     public IActionResult Block(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues licenseKeyStringValue) == false)
         {
             return BadRequest();
         }
@@ -145,15 +145,15 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return BadRequest();
         }
 
-        string key = keyStringValue.ToString();
-        key.Rules()
+        string licenseKey = licenseKeyStringValue.ToString();
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
-            .Return(out IStringValidator keyStringValidator);
+            .Return(out IStringValidator licenseKeyStringValidator);
 
-        if (keyStringValidator.Failed)
+        if (licenseKeyStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
         name.Rules()
@@ -171,7 +171,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.Name.Equals(name)
             && p.Free);*/
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -202,11 +202,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
             && p.Name.Equals(name));*/
         PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name));
         if (paidPlugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound)));
         }
 
         if (paidPlugin.Banned)
@@ -232,7 +232,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
     public IActionResult Unblock(string name)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.Key, out StringValues keyStringValue) == false)
+        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {
             return BadRequest();
         }
@@ -247,15 +247,15 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return BadRequest();
         }
 
-        string key = keyStringValue.ToString();
-        key.Rules()
+        string licenseKey = keyStringValue.ToString();
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
-            .Return(out IStringValidator keyStringValidator);
+            .Return(out IStringValidator licenseKeyStringValidator);
 
-        if (keyStringValidator.Failed)
+        if (licenseKeyStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.KeyValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
         name.Rules()
@@ -273,7 +273,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.Name.Equals(name)
             && p.Free);*/
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -304,11 +304,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
             && p.Name.Equals(name));*/
         PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
-            p.Key.Equals(key)
+            p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name));
         if (paidPlugin == null)
         {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedKeyOrIPNotBindedOrNameNotFound)));
+            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SpecifiedLicenseKeyOrIPNotBindedOrNameNotFound)));
         }
 
         if (paidPlugin.Banned)
