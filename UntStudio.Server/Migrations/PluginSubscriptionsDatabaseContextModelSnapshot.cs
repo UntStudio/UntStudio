@@ -46,7 +46,7 @@ namespace UntStudio.Server.Migrations
                     b.Property<bool>("Free")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("LicenseKey")
                         .IsRequired()
                         .HasMaxLength(19)
                         .HasColumnType("nvarchar(19)");

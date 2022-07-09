@@ -44,27 +44,14 @@ namespace UntStudio.Bootstrapper
             {
                 if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
-                    Rocket.Core.Logging.Logger.Log("License server is down, sorry about that.");
+                    Rocket.Core.Logging.Logger.LogWarning("License server is down, sorry about that.");
                 }
 
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    Rocket.Core.Logging.Logger.Log("Loader version is outdated.");
+                    Rocket.Core.Logging.Logger.LogWarning("Bootstrapper version is outdated.");
                 }
                 return new ServerResult(response.StatusCode);
-            }
-            catch (WebException ex)
-            {
-                if (ex.Status == WebExceptionStatus.ConnectFailure)
-                {
-                    Rocket.Core.Logging.Logger.Log("Connection failure, server is down.");
-                }
-                else
-                {
-                    Rocket.Core.Logging.Logger.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
-                }
-
-                Rocket.Core.Logging.Logger.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
             }
             catch (Exception ex)
             {
@@ -76,7 +63,6 @@ namespace UntStudio.Bootstrapper
         public async Task<ServerResult> GetLoaderEntryPointAsync(string licenseKey)
         {
             WebClient webClient = new WebClient();
-
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
             webClient.Headers.Add("LicenseKey", licenseKey);
 
@@ -103,7 +89,15 @@ namespace UntStudio.Bootstrapper
             }
             catch (WebException ex) when (ex.Response is HttpWebResponse response)
             {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
+                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    Rocket.Core.Logging.Logger.LogWarning("License server is down, sorry about that.");
+                }
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Rocket.Core.Logging.Logger.LogWarning("Bootstrapper version is outdated.");
+                }
                 return new ServerResult(response.StatusCode);
             }
             catch (WebException ex)

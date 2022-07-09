@@ -13,7 +13,7 @@ public sealed class Server : IServer
 {
     private readonly ILogging logging;
     
-    private const string UnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/unload?name={0}";
+    private const string GetUnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/unload?name={0}";
 
 
 
@@ -33,7 +33,7 @@ public sealed class Server : IServer
         string responseText = null;
         try
         {
-            responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(UnloadPluginRequest, name)));
+            responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(GetUnloadPluginRequest, name)));
             RequestResponse response = null;
             if (responseText != null)
             {
@@ -54,7 +54,7 @@ public sealed class Server : IServer
         {
             if (response.StatusCode == HttpStatusCode.InternalServerError)
             {
-                this.logging.LogException(ex, "License server is down, sorry about that.");
+                this.logging.Log("License server is down, sorry about that.");
             }
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -74,8 +74,6 @@ public sealed class Server : IServer
             {
                 this.logging.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
             }
-
-            this.logging.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
         }
         catch (Exception ex)
         {

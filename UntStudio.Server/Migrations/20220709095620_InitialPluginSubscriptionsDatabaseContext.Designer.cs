@@ -12,8 +12,8 @@ using UntStudio.Server.Data;
 namespace UntStudio.Server.Migrations
 {
     [DbContext(typeof(PluginSubscriptionsDatabaseContext))]
-    [Migration("20220704105305_PluginSubscriptionsDatabaseInitMigration")]
-    partial class PluginSubscriptionsDatabaseInitMigration
+    [Migration("20220709095620_InitialPluginSubscriptionsDatabaseContext")]
+    partial class InitialPluginSubscriptionsDatabaseContext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,7 +49,7 @@ namespace UntStudio.Server.Migrations
                     b.Property<bool>("Free")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("LicenseKey")
                         .IsRequired()
                         .HasMaxLength(19)
                         .HasColumnType("nvarchar(19)");

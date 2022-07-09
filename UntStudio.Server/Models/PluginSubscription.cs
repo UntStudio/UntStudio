@@ -44,8 +44,8 @@ public class PluginSubscription
     [Required]
     public string AllowedAddresses { get; set; }
 
-    [Required]
-    public string HWID { get; set; }
+    //[Required]
+    //public string HWID { get; set; }
 
     public string[] AllowedAddressesParsed => AllowedAddresses.Split(',');
 
