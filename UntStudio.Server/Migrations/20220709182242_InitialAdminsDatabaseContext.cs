@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace UntStudio.Server.Migrations.AdminsDatabase
+namespace UntStudio.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitAdminsDatabaseMigration : Migration
+    public partial class InitialAdminsDatabaseContext : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -8,11 +8,11 @@ using UntStudio.Server.Data;
 
 #nullable disable
 
-namespace UntStudio.Server.Migrations.AdminsDatabase
+namespace UntStudio.Server.Migrations
 {
     [DbContext(typeof(AdminsDatabaseContext))]
-    [Migration("20220701112312_InitAdminsDatabaseMigration")]
-    partial class InitAdminsDatabaseMigration
+    [Migration("20220709182242_InitialAdminsDatabaseContext")]
+    partial class InitialAdminsDatabaseContext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,0 +1,16 @@
+﻿@{
+	string returnUrl = ViewData["ReturnUrl"] as string;
+	string errorMessage = TempData["ErrorMessage"] as string;
+}
+
+<h1>Login</h1>
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<h2 class="alert-danger" style="padding:20px;">@errorMessage</h2>
+}
+
+<form action="/login?returnUrl=@System.Net.WebUtility.UrlEncode(returnUrl)" method="post">
+	<input type="text" name="login" placeholder="Login" />
+	<input type="password" name="password" placeholder="Password" />
+	<input type="submit" value="login" />
+</form>

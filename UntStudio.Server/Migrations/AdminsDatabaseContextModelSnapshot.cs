@@ -7,7 +7,7 @@ using UntStudio.Server.Data;
 
 #nullable disable
 
-namespace UntStudio.Server.Migrations.AdminsDatabase
+namespace UntStudio.Server.Migrations
 {
     [DbContext(typeof(AdminsDatabaseContext))]
     partial class AdminsDatabaseContextModelSnapshot : ModelSnapshot
