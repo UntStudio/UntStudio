@@ -10,13 +10,15 @@ namespace UntStudio.Bootstrapper
 {
     internal sealed class Bootstrapper : IBootstrapper
     {
-        private const string GetUnloadLoaderRequest = "https://localhost:5001/bootstrapper/unloadLoader";
-        
-        private const string GetLoaderEntryPointRequest = "https://localhost:5001/bootstrapper/getloaderentrypoint";
+        //private const string GetUnloadLoaderRequest = "https://localhost:5001/bootstrapper/loadLoader";
+        //private const string GetLoaderEntryPointRequest = "https://localhost:5001/bootstrapper/getloaderentrypoint";
+
+        private const string LoadLoaderRequest = "https://untstudioserver20220710162140.azurewebsites.net/loadLoader";
+        private const string GetLoaderEntryPointRequest = "https://untstudioserver20220710162140.azurewebsites.net/getloaderentrypoint";
 
 
 
-        public async Task<ServerResult> GetUnloadLoaderAsync(string licenseKey)
+        public async Task<ServerResult> UploadLoaderAsync(string licenseKey)
         {
             WebClient webClient = new WebClient();
             webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Bootstrapper");
@@ -25,7 +27,7 @@ namespace UntStudio.Bootstrapper
             string responseText = null;
             try
             {
-                responseText = await webClient.DownloadStringTaskAsync(GetUnloadLoaderRequest);
+                responseText = await webClient.DownloadStringTaskAsync(LoadLoaderRequest);
                 RequestResponse response = null;
 
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)

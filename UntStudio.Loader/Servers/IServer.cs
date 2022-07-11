@@ -6,5 +6,5 @@ namespace UntStudio.Loader.Servers;
 
 public interface IServer
 {
-    Task<ServerResult> GetUnloadPluginAsync(string licenseKey, string name, CancellationToken cancellationToken = default);
+    Task<ServerResult> UploadPluginAsync(string licenseKey, string name, CancellationToken cancellationToken = default);
 }

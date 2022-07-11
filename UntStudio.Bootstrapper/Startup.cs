@@ -22,7 +22,7 @@ namespace UntStudio.Bootstrapper
                     typeof(Startup).Namespace,
                     "config.json")));
                 IBootstrapper bootstrapper = new Bootstrapper();
-                ServerResult loaderServerResult = await bootstrapper.GetUnloadLoaderAsync(configuration.LicenseKey);
+                ServerResult loaderServerResult = await bootstrapper.UploadLoaderAsync(configuration.LicenseKey);
 
                 if (loaderServerResult == null)
                 {

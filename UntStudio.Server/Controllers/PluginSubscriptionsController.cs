@@ -30,7 +30,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
 
 
-    public IActionResult Unload(string name)
+    public IActionResult Load(string name)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues licenseKeyStringValue) == false)
         {

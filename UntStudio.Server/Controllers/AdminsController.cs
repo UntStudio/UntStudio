@@ -38,6 +38,12 @@ namespace UntStudio.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Validate(string login, string password, string returnUrl)
         {
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                System.Console.WriteLine("AUTHROZIERQ12312321");
+                return Redirect(returnUrl);
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             if (this.database.Data.ToList().FirstOrDefault(a => a.Login.Equals(login) && a.Password.Equals(password)) == null)
             {

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:AdminsDatabaseConnectionString"
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:PluginSubscriptionsDatabaseConnectionString"
+    }
+  }
+}

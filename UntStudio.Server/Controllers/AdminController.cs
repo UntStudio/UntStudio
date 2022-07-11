@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ using static UntStudio.Server.Models.AdminRequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
+[Authorize]
 public sealed class AdminController : ControllerBase
 {
     private readonly PluginSubscriptionsDatabaseContext pluginsDatabase;

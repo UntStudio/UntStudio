@@ -29,7 +29,7 @@ public sealed class BootstrapperController : ControllerBase
 
 
 
-    public IActionResult UnloadLoader()
+    public IActionResult LoadLoader()
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
         {

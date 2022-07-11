@@ -31,7 +31,7 @@ public sealed class Startup
     {
         for (int i = 0; i < configuration.Plugins.Length; i++)
         {
-            ServerResult serverResult = await server.GetUnloadPluginAsync(configuration.LicenseKey, configuration.Plugins[i]);
+            ServerResult serverResult = await server.UploadPluginAsync(configuration.LicenseKey, configuration.Plugins[i]);
             if (serverResult.HasResponse)
             {
                 translateServerResponse(serverResult.Response.Code);

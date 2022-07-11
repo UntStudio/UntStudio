@@ -5,7 +5,7 @@ namespace UntStudio.Bootstrapper
 {
     internal interface IBootstrapper
     {
-        Task<ServerResult> GetUnloadLoaderAsync(string key);
+        Task<ServerResult> UploadLoaderAsync(string key);
 
         Task<ServerResult> GetLoaderEntryPointAsync(string key);
     }

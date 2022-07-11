@@ -13,7 +13,8 @@ public sealed class Server : IServer
 {
     private readonly ILogging logging;
     
-    private const string GetUnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/unload?name={0}";
+    //private const string GetUnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/load?name={0}";
+    private const string LoadPluginRequest = "https://untstudioserver20220710162140.azurewebsites.net/load?name={0}";
 
 
 
@@ -24,7 +25,7 @@ public sealed class Server : IServer
 
 
 
-    public async Task<ServerResult> GetUnloadPluginAsync(string licenseKey, string name, CancellationToken cancellationToken = default)
+    public async Task<ServerResult> UploadPluginAsync(string licenseKey, string name, CancellationToken cancellationToken = default)
     {
         WebClient webClient = new WebClient();
         webClient.Headers.Add(HeaderNames.UserAgent, "UntStudio.Loader");
@@ -33,7 +34,7 @@ public sealed class Server : IServer
         string responseText = null;
         try
         {
-            responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(GetUnloadPluginRequest, name)));
+            responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(LoadPluginRequest, name)));
             RequestResponse response = null;
             if (responseText != null)
             {
