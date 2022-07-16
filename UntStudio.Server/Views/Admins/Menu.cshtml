@@ -1,6 +1,48 @@
-﻿<h2>@User.Identity.Name, Hello and Welcome! </h2>
+﻿<h2>@User.Identity.Name Hello and Welcome!</h2>
+@Html.ActionLink("Your profile", "Profile")
 
-@using (Html.BeginForm("HandleButtonClick", "AdminsMenu"))
+@using (Html.BeginForm("AddSubscription", "AdminsMenu", FormMethod.Get))
 {
-	<button type="submit" name="test">Click me</button>
+	<button type="submit" name="addsubscription">Add subscription</button>
 }
+
+@using (Html.BeginForm("AddFreeSubscription", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="addfreesubscription">Add free subscription</button>
+}
+
+@using (Html.BeginForm("BanSubscription", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="bansubscription">Ban subscription</button>
+}
+
+@using (Html.BeginForm("BanSubscriptions", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="bansubscriptions">Ban subscriptions</button>
+}
+
+@using (Html.BeginForm("UnbanSubscription", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="unbansubscription">Unban subscription</button>
+}
+
+@using (Html.BeginForm("UnbanSubscriptions", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="unbansubscriptions">Unban subscriptions</button>
+}
+
+@using (Html.BeginForm("GetSubscription", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="getsubscription">Get subscription</button>
+}
+
+@using (Html.BeginForm("GetSubscriptions", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="getsubscriptions">Get subscriptions</button>
+}
+
+@using (Html.BeginForm("GetAllSubscriptions", "AdminsMenu", FormMethod.Get))
+{
+	<button type="submit" name="getallsubscriptions">Get all subscriptions</button>
+}
+

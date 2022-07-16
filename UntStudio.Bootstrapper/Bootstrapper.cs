@@ -10,9 +10,6 @@ namespace UntStudio.Bootstrapper
 {
     internal sealed class Bootstrapper : IBootstrapper
     {
-        //private const string GetUnloadLoaderRequest = "https://localhost:5001/bootstrapper/loadLoader";
-        //private const string GetLoaderEntryPointRequest = "https://localhost:5001/bootstrapper/getloaderentrypoint";
-
         private const string LoadLoaderRequest = "https://untstudioserver20220710162140.azurewebsites.net/loadLoader";
         private const string GetLoaderEntryPointRequest = "https://untstudioserver20220710162140.azurewebsites.net/getloaderentrypoint";
 

@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using UntStudio.Server.Attributes;
 using UntStudio.Server.Data;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
@@ -14,30 +16,22 @@ using static UntStudio.Server.Models.AdminRequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
-[Authorize]
+[AllowUnauthenticatedHost(KnownHosts.DeployedWebsiteURL)]
 public sealed class AdminController : ControllerBase
 {
     private readonly PluginSubscriptionsDatabaseContext pluginsDatabase;
 
-    private readonly AdminsDatabaseContext adminsDatabase;
 
 
-
-    public AdminController(PluginSubscriptionsDatabaseContext pluginsDatabase, AdminsDatabaseContext adminsDatabase)
+    public AdminController(PluginSubscriptionsDatabaseContext pluginsDatabase)
     {
         this.pluginsDatabase = pluginsDatabase;
-        this.adminsDatabase = adminsDatabase;
     }
 
 
 
-    public IActionResult AddSubscription(string name, string allowedAddresses, int days)
+    public async Task<IActionResult> AddSubscription(string licenseKey, string pluginName, string allowedAddresses, int days)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -48,25 +42,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -85,20 +61,15 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.AllowedAddressesNotSpecified)));
         }
 
-        PluginSubscription plugin = new PluginSubscription(name, key, allowedAddresses, DateTime.Now.AddDays(days));
+        PluginSubscription plugin = new PluginSubscription(pluginName, licenseKey, allowedAddresses, DateTime.Now.AddDays(days));
         this.pluginsDatabase.Data.Add(plugin);
-        this.pluginsDatabase.SaveChangesAsync();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
 
-    public IActionResult AddFreeSubscription(string name, string allowedAddresses)
+    public async Task<IActionResult> AddFreeSubscription(string licenseKey, string pluginName, string allowedAddresses)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -109,25 +80,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -137,7 +90,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        name.Rules()
+        pluginName.Rules()
             .ContentNotNullOrWhiteSpace()
             .Return(out IStringValidator nameStringValidator);
 
@@ -146,21 +99,16 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = new PluginSubscription(name, key, allowedAddresses);
+        PluginSubscription plugin = new PluginSubscription(pluginName, licenseKey, allowedAddresses);
         plugin.SetFree();
         this.pluginsDatabase.Data.Add(plugin);
-        this.pluginsDatabase.SaveChanges();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
 
-    public IActionResult BanSubscription(string name)
+    public async Task<IActionResult> BanSubscription(string licenseKey, string pluginName)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -171,25 +119,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -199,7 +129,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        name.Rules()
+        pluginName.Rules()
             .ContentNotNullOrWhiteSpace()
             .Return(out IStringValidator nameStringValidator);
 
@@ -208,7 +138,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -221,18 +151,13 @@ public sealed class AdminController : ControllerBase
 
         plugin.SetBan();
         this.pluginsDatabase.Data.Update(plugin);
-        this.pluginsDatabase.SaveChanges();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok();
     }
 
-    public IActionResult BanSubscriptions()
+    public async Task<IActionResult> BanSubscriptions(string licenseKey)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -243,25 +168,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -271,7 +178,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -283,18 +190,13 @@ public sealed class AdminController : ControllerBase
         }
 
         this.pluginsDatabase.Data.UpdateRange(plugins);
-        this.pluginsDatabase.SaveChanges();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok();
     }
 
-    public IActionResult UnbanSubscription(string name)
+    public async Task<IActionResult> UnbanSubscription(string licenseKey, string pluginName)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -305,25 +207,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -333,7 +217,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -341,18 +225,13 @@ public sealed class AdminController : ControllerBase
 
         plugin.SetUnban();
         this.pluginsDatabase.Data.Update(plugin);
-        this.pluginsDatabase.SaveChanges();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok();
     }
 
-    public IActionResult UnbanSubscriptions()
+    public async Task<IActionResult> UnbanSubscriptions(string licenseKey)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -363,25 +242,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -391,7 +252,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key));
+        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey));
         if (plugins == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
@@ -403,18 +264,13 @@ public sealed class AdminController : ControllerBase
         }
 
         this.pluginsDatabase.Data.UpdateRange(plugins);
-        this.pluginsDatabase.SaveChanges();
+        await this.pluginsDatabase.SaveChangesAsync();
 
         return Ok();
     }
 
-    public IActionResult GetSubscription(string name)
+    public IActionResult GetSubscription(string licenseKey, string pluginName)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -425,25 +281,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -453,16 +291,16 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        name.Rules()
+        pluginName.Rules()
             .ContentNotNullOrWhiteSpace()
             .Return(out IStringValidator nameStringValidator);
 
         if (nameStringValidator.Failed)
         {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed), Formatting.Indented));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(key) && p.Name.Equals(name));
+        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
         if (plugin == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
@@ -471,13 +309,8 @@ public sealed class AdminController : ControllerBase
         return Ok(JsonConvert.SerializeObject(plugin));
     }
 
-    public IActionResult GetSubscriptions()
+    public IActionResult GetSubscriptions(string licenseKey)
     {
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues keyStringValue) == false)
-        {
-            return BadRequest();
-        }
-
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
             return BadRequest();
@@ -488,25 +321,7 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
-        }
-
-        string key = keyStringValue.ToString();
-        key.Rules()
+        licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
             .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
             .Return(out IStringValidator keyStringValidator);
@@ -516,7 +331,7 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(key))));
+        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey)).ToList(), Formatting.Indented));
     }
 
     public IActionResult GetAllSubscriptions()
@@ -529,23 +344,6 @@ public sealed class AdminController : ControllerBase
         if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
         {
             return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminLogin, out StringValues adminLoginStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.AdminPassword, out StringValues adminPasswordStringValue) == false)
-        {
-            return BadRequest();
-        }
-
-        if (this.adminsDatabase.Data.ToList().FirstOrDefault(a =>
-            a.Login.Equals(adminLoginStringValue.ToString())
-            && a.Password.Equals(adminPasswordStringValue.ToString())) == null)
-        {
-            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedAdminCredentialsNotExsist)));
         }
 
         return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.ToList()));

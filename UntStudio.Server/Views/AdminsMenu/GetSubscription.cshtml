@@ -1,0 +1,31 @@
+﻿@using UntStudio.Server.Models
+@model PluginSubscription
+
+@{
+	string errorMessage = TempData["ErrorMessage"] as string;
+	string successMessage = TempData["SuccessMessage"] as string;
+}
+
+@using (Html.BeginForm("GetSubscription", "AdminsMenu", FormMethod.Post))
+{
+	<input type="password" name="licenseKey" placeholder="License Key" />
+	<input type="text" name="pluginName" placeholder="Plugin Name" />
+	<input type="submit" value="get" />
+}
+
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<font color="red">
+		<strong>@errorMessage</strong>
+	</font>
+	@Html.ActionLink("Click, to read help.", "Help")
+}
+
+@if (string.IsNullOrWhiteSpace(successMessage) == false && Model != null)
+{
+	<font color="green">
+		<strong>@successMessage</strong>
+	</font>
+
+	@Html.ActionLink("Click to download data about subscription in JSON file format.", "DownloadData", Model)
+}

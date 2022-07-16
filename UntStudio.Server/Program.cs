@@ -5,11 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using System;
 using UntStudio.Server.Data;
+using UntStudio.Server.Knowns;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddDbContext<PluginSubscriptionsDatabaseContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PluginSubscriptionsDatabaseConnectionString"));
@@ -27,6 +28,13 @@ builder.Services.AddLogging(configure =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient(KnownHttpClientNames.AdminsAPI, configure =>
+{
+    //configure.BaseAddress = new Uri("https://localhost:7192/admin/");
+    configure.BaseAddress = new Uri("https://untstudioserver20220710162140.azurewebsites.net/admin/");
+    configure.DefaultRequestHeaders.Add(HeaderNames.UserAgent, KnownHeaders.UserAgentAdminValue);
+});
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(configure =>
     {
@@ -35,8 +43,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 WebApplication app = builder.Build();
-
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() == false)
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

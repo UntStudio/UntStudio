@@ -15,6 +15,7 @@ public class AdminRequestResponse
 
     public enum AdminCodeResponse
     {
+        None,
         KeyValidationFailed,
         NameValidationFailed,
         SpecifiedAdminCredentialsNotExsist,

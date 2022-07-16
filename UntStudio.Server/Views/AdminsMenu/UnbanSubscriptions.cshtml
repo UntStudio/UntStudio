@@ -1,0 +1,25 @@
+﻿@{
+	string errorMessage = TempData["ErrorMessage"] as string;
+	string successMessage = TempData["SuccessMessage"] as string;
+}
+
+@using (Html.BeginForm("UnbanSubscriptions", "AdminsMenu", FormMethod.Post))
+{
+	<input type="password" name="licenseKey" placeholder="License Key" />
+	<input type="submit" value="add" />
+}
+
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<font color="red">
+		<strong>@errorMessage</strong>
+	</font>
+	@Html.ActionLink("Click, to read help.", "Help")
+}
+
+@if (string.IsNullOrWhiteSpace(successMessage) == false)
+{
+	<font color="green">
+		<strong>@successMessage</strong>
+	</font>
+}

@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Routing
+@using UntStudio.Server.Models
+@model string
+
+@{
+	string errorMessage = TempData["ErrorMessage"] as string;
+	string successMessage = TempData["SuccessMessage"] as string;
+}
+
+@using (Html.BeginForm("GetSubscriptions", "AdminsMenu", FormMethod.Post))
+{
+	<input type="password" name="licenseKey" placeholder="License Key" />
+	<input type="submit" value="get" />
+}
+
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<font color="red">
+		<strong>@errorMessage</strong>
+	</font>
+	@Html.ActionLink("Click, to read help.", "Help");
+}
+
+@if (string.IsNullOrWhiteSpace(successMessage) == false)
+{
+	@if (string.IsNullOrWhiteSpace(Model) == false)
+	{
+		<font color="green">
+			<strong>@successMessage</strong>
+		</font>
+
+		@Html.ActionLink("Click to download data about subscriptions in JSON file format.", "DownloadDatas", new { licenseKey = Model})
+	}
+	else
+	{
+		<font color="yellow">
+			<strong>No one subscription were found.</strong>
+		</font>
+	}
+}

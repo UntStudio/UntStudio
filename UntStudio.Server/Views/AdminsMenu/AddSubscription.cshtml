@@ -1,0 +1,28 @@
+﻿@{
+	string errorMessage = TempData["ErrorMessage"] as string;
+	string successMessage = TempData["SuccessMessage"] as string;
+}
+
+@using (Html.BeginForm("AddSubscription", "AdminsMenu", FormMethod.Post))
+{
+	<input type="password" name="licenseKey" placeholder="License Key" />
+	<input type="text" name="pluginName" placeholder="Plugin Name" />
+	<input type="text" name="allowedAddresses" placeholder="Allowed Addresses" />
+	<input type="text" name="days" placeholder="Days" />
+	<input type="submit" value="add" />
+}
+
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<font color="red">
+		<strong>@errorMessage</strong>
+	</font>
+	@Html.ActionLink("Click, to read help.", "Help")
+}
+
+@if (string.IsNullOrWhiteSpace(successMessage) == false)
+{
+	<font color="green">
+		<strong>@successMessage</strong>
+	</font>
+}

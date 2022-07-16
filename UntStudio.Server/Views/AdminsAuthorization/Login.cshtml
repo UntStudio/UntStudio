@@ -1,0 +1,25 @@
+﻿@{
+	string returnUrl = ViewData["ReturnUrl"] as string;
+	string errorMessage = TempData["ErrorMessage"] as string;
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+	<h3 class="alert-danger">To login again you should be logouted.</h3>
+	@Html.ActionLink("Logout", "Logout", "AdminsAuthorization")
+}
+else
+{
+	<p>Authenticate yourself please.</p>
+	@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+	{
+		<h3 class="alert-danger">@errorMessage</h3>
+	}
+
+	@using (Html.BeginForm("Login", "AdminsAuthorization", new { returnUrl }, FormMethod.Post))
+	{
+		<input type="text" name="login" placeholder="Login" />
+		<input type="password" name="password" placeholder="Password" />
+		<input type="submit" value="login" />
+	}
+}
