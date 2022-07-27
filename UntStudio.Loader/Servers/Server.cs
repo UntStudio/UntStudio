@@ -12,9 +12,6 @@ namespace UntStudio.Loader.Servers;
 public sealed class Server : IServer
 {
     private readonly ILogging logging;
-    
-    //private const string GetUnloadPluginRequest = "https://localhost:5001/pluginsubscriptions/load?name={0}";
-    private const string LoadPluginRequest = "https://untstudioserver20220710162140.azurewebsites.net/load?name={0}";
 
 
 
@@ -34,7 +31,7 @@ public sealed class Server : IServer
         string responseText = null;
         try
         {
-            responseText = await webClient.DownloadStringTaskAsync(new Uri(string.Format(LoadPluginRequest, name)));
+            responseText = await webClient.DownloadStringTaskAsync(new Uri($"http://135.181.47.150/pluginSubscriptions/load?name={name}"));
             RequestResponse response = null;
             if (responseText != null)
             {

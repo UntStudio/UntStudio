@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -35,12 +34,6 @@ public sealed class AdminsMenuController : Controller
         return View();
     }
 
-    [HttpGet("addsubscription")]
-    public IActionResult AddSubscription()
-    {
-        return View();
-    }
-
     public IActionResult DownloadData(PluginSubscription pluginSubscription)
     {
         string serializedData = JsonConvert.SerializeObject(pluginSubscription, Formatting.Indented);
@@ -58,24 +51,10 @@ public sealed class AdminsMenuController : Controller
         return File(memoryStream, "APPLICATION/octet-stream", $"{pluginSubscription.Name}.json");
     }
 
-    public IActionResult DownloadDatas(string licenseKey)
+    [HttpGet("addsubscription")]
+    public IActionResult AddSubscription()
     {
-        System.Console.WriteLine("License key; " + licenseKey);
-        List<PluginSubscription> pluginSubscriptions = this.pluginSubscriptionsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey)).ToList();
-        System.Console.WriteLine("Count of plugins: " + pluginSubscriptions.Count);
-        string serializedData = JsonConvert.SerializeObject(pluginSubscriptions, Formatting.Indented);
-        char[] characters = serializedData.ToCharArray();
-        byte[] bytes = new byte[characters.Length];
-        for (var i = 0; i < characters.Length; i++)
-        {
-            bytes[i] = (byte)characters[i];
-        }
-
-        MemoryStream memoryStream = new MemoryStream();
-        memoryStream.Write(bytes);
-        memoryStream.Position = 0;
-
-       return File(memoryStream, "APPLICATION/octet-stream", $"{pluginSubscriptions.Count()}_plugins.json");
+        return View();
     }
 
     [HttpPost("addsubscription")]
@@ -119,9 +98,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = "Successfully added new subscription!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while adding new subscription.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while adding new subscription.";
         }
 
         return View();
@@ -168,9 +147,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = "Successfully added new free subscription!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while adding new free subscription.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while adding new free subscription.";
         }
 
         return View();
@@ -224,9 +203,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = "Successfully banned subscription!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while banning subscription.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while banning subscription.";
         }
 
         return View();
@@ -268,9 +247,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = $"Successfully banned {subscriptionsCount} subscriptions!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while banning subscriptions.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while banning subscriptions.";
         }
 
         return View();
@@ -317,9 +296,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = $"Successfully unbanned subscription!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while unbanning subscription.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while unbanning subscription.";
         }
 
         return View();
@@ -361,9 +340,9 @@ public sealed class AdminsMenuController : Controller
                 TempData["SuccessMessage"] = $"Successfully unbanned {subscriptionsCount} subscriptions!";
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while unbanning subscriptions.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while unbanning subscriptions.";
         }
 
         return View();
@@ -425,9 +404,9 @@ public sealed class AdminsMenuController : Controller
                 return View(pluginSubscription);
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = "An error occured on server side, while searching for a subscription.";
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while searching for a subscription.";
         }
         catch (JsonReaderException)
         {
@@ -437,14 +416,14 @@ public sealed class AdminsMenuController : Controller
         return View();
     }
 
-    [HttpGet("getsubscriptions")]
-    public IActionResult GetSubscriptions()
+    [HttpGet("updatesubscriptionip")]
+    public IActionResult UpdateSubscriptionIP()
     {
         return View();
     }
-
-    [HttpPost("getsubscriptions")]
-    public async Task<IActionResult> GetSubscriptions(string licenseKey)
+    
+    [HttpPost("updatesubscriptionip")]
+    public async Task<IActionResult> UpdateSubscriptionIP(string licenseKey, string pluginName, string newIP)
     {
         licenseKey.Rules()
             .ContentNotNullOrWhiteSpace()
@@ -457,72 +436,103 @@ public sealed class AdminsMenuController : Controller
             return View();
         }
 
-        if (pluginSubscriptionsDatabase.Data.Any(p => p.LicenseKey.Equals(licenseKey)) == false)
+        PluginSubscription subscription = null;
+        if ((subscription = pluginSubscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
         {
-            TempData["ErrorMessage"] = "No one subscription cannot be found check your license key.";
+            TempData["ErrorMessage"] = "Specified subscription cannot be found or check your license key or plugin name.";
             return View();
+        }
+
+        if (string.IsNullOrEmpty(newIP))
+        {
+            TempData["WarningMessage"] = "Subscription successfully found! Please, now update the IP.";
+            return View(subscription);
+        }
+
+        if (newIP.Equals(subscription.AllowedAddresses))
+        {
+            TempData["SuccessMessage"] = "You didnt made any changes in IP.";
+            return View(subscription);
         }
 
         try
         {
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#1");
             HttpClient httpClient = httpClientFactory.CreateClient(KnownHttpClientNames.AdminsAPI);
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#2");
-
-            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync($"GetSubscriptions?{nameof(licenseKey)}={licenseKey}");
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#3");
-
+            HttpResponseMessage httpResponseMessage = await httpClient.PostAsync($"UpdateSubscriptionIP?{nameof(licenseKey)}={licenseKey}&{nameof(pluginName)}={pluginName}&{nameof(newIP)}={newIP}", null);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#4");
-
-                string responseText = await httpResponseMessage.Content.ReadAsStringAsync();
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#5");
-
-                if (string.IsNullOrWhiteSpace(responseText))
-                {
-                    System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#6");
-
-                    TempData["ErrorMessage"] = "Something went wrong, no answer from API.";
-                    return View();
-                }
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#7");
-
-
-                List<PluginSubscription> pluginSubscriptions = null;
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#8");
-
-                if ((pluginSubscriptions = JsonConvert.DeserializeObject<List<PluginSubscription>>(responseText)) == null)
-                {
-                    System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#9");
-                    TempData["ErrorMessage"] = "Something went wrong, not able to deserialize response from API to json.";
-                    System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#10");
-                    return View();
-                }
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#11");
-
-                TempData["SuccessMessage"] = $"Successfully found subscriptions!";
-                System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#12");
-                System.Console.WriteLine("Response text START: " + responseText);
-                System.Console.WriteLine("Response text END>>:");
-                return View(licenseKey);
+                TempData["SuccessMessage"] = $"Successfully updated subscription IP!";
             }
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#13");
+            else
+            {
+                TempData["ErrorMessage"] = $"[{httpResponseMessage.StatusCode}] Failed to update subscription IP!";
+            }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#14");
-            TempData["ErrorMessage"] = "An error occured on server side, while searching for a subscriptions.";
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#15");
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while updating subscription IP.";
         }
-        catch (JsonReaderException)
-        {
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#16");
-            TempData["ErrorMessage"] = "An error occured at json reading, while searching for a subscriptions.";
-            System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#17");
-        }
-        System.Console.WriteLine(">>>>>>>>>>>>>>>>>> FLAG#18");
 
         return View();
     }
+
+   /* [HttpPost("updatesubscriptionexprire")]
+    public IActionResult UpdateSubscriptionExpire()
+    {
+        return View();
+    }
+
+    [HttpGet("updatesubscriptionexpire")]
+    public async Task<IActionResult> UpdateSubscriptionExpire(string licenseKey, string pluginName, int newDays)
+    {
+        licenseKey.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator licenseKeyStringValidator);
+
+        if (licenseKeyStringValidator.Failed)
+        {
+            TempData["ErrorMessage"] = "License key cannot be empty or less than 19 characters.";
+            return View();
+        }
+
+        PluginSubscription subscription = null;
+        if ((subscription = pluginSubscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
+        {
+            TempData["ErrorMessage"] = "Specified subscription cannot be found or check your license key or plugin name.";
+            return View();
+        }
+
+        if (string.IsNullOrEmpty(newIP))
+        {
+            TempData["WarningMessage"] = "Subscription successfully found! Please, now update the IP.";
+            return View(subscription);
+        }
+
+        if (newIP.Equals(subscription.AllowedAddresses))
+        {
+            TempData["SuccessMessage"] = "You didnt made any changes in IP.";
+            return View(subscription);
+        }
+
+        try
+        {
+            HttpClient httpClient = httpClientFactory.CreateClient(KnownHttpClientNames.AdminsAPI);
+            HttpResponseMessage httpResponseMessage = await httpClient.PostAsync($"UpdateSubscriptionExpire?{nameof(licenseKey)}={licenseKey}&{nameof(pluginName)}={pluginName}&{nameof(newIP)}={newIP}", null);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                TempData["SuccessMessage"] = $"Successfully updated subscription IP!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"[{httpResponseMessage.StatusCode}] Failed to update subscription IP!";
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["ErrorMessage"] = $"[{ex.StatusCode}] An error occured on server side, while updating subscription IP.";
+        }
+
+        return View();
+    }*/
 }

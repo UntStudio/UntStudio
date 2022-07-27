@@ -6,7 +6,9 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UntStudio.Server.Data;
+using UntStudio.Server.Encryptors;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
 using UntStudio.Server.Strings;
@@ -20,17 +22,20 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
     private readonly IConfiguration configuration;
 
+    private readonly IEncryptor encryptor;
 
 
-    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration)
+
+    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IEncryptor encryptor)
     {
         this.database = database;
         this.configuration = configuration;
+        this.encryptor = encryptor;
     }
 
 
 
-    public IActionResult Load(string name)
+    public async Task<IActionResult> Load(string name)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues licenseKeyStringValue) == false)
         {
@@ -125,10 +130,14 @@ public sealed class PluginSubscriptionsController : ControllerBase
         }
 
         string pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-        return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(pluginFile)));
+        byte[] defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+        byte[] encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
+        return Ok(Convert.ToBase64String(encryptedBytes));
+
+        //return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(pluginFile)));
     }
 
-    public IActionResult Block(string name)
+    /*public IActionResult Block(string name)
     {
         if (HttpContext.Request.Headers.TryGetValue(KnownHeaders.LicenseKey, out StringValues licenseKeyStringValue) == false)
         {
@@ -165,11 +174,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        *//*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
             && p.Name.Equals(name)
-            && p.Free);*/
+            && p.Free);*//*
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name)
@@ -197,10 +206,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Ok();
         }
 
-        /*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        *//*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
-            && p.Name.Equals(name));*/
+            && p.Name.Equals(name));*//*
         PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name));
@@ -267,11 +276,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        *//*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
             && p.Name.Equals(name)
-            && p.Free);*/
+            && p.Free);*//*
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name)
@@ -299,10 +308,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Ok();
         }
 
-        /*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
+        *//*PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.Key.Equals(key)
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
-            && p.Name.Equals(name));*/
+            && p.Name.Equals(name));*//*
         PluginSubscription paidPlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
             && p.Name.Equals(name));
@@ -330,5 +339,5 @@ public sealed class PluginSubscriptionsController : ControllerBase
         this.database.Data.Update(paidPlugin);
         this.database.SaveChanges();
         return Ok();
-    }
+    }*/
 }

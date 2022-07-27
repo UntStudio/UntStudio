@@ -36,13 +36,7 @@
 	<button type="submit" name="getsubscription">Get subscription</button>
 }
 
-@using (Html.BeginForm("GetSubscriptions", "AdminsMenu", FormMethod.Get))
+@using (Html.BeginForm("UpdateSubscriptionIP", "AdminsMenu", FormMethod.Get))
 {
-	<button type="submit" name="getsubscriptions">Get subscriptions</button>
+	<button type="submit" name="updatesubscriptionip">Update subscription IP</button>
 }
-
-@using (Html.BeginForm("GetAllSubscriptions", "AdminsMenu", FormMethod.Get))
-{
-	<button type="submit" name="getallsubscriptions">Get all subscriptions</button>
-}
-

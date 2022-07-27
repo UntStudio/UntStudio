@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UntStudio.Loader.API;
+using UntStudio.Loader.Decryptors;
 using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
@@ -21,13 +22,14 @@ public sealed class Startup
         (
             (ILoaderConfiguration)serviceProvider.GetService(typeof(ILoaderConfiguration)),
             (IServer)serviceProvider.GetService(typeof(IServer)),
-            (ILogging)serviceProvider.GetService(typeof(ILogging))
+            (ILogging)serviceProvider.GetService(typeof(ILogging)),
+            (IDecryptor)serviceProvider.GetService(typeof(IDecryptor))
         );
     }
 
 
 
-    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging)
+    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor)
     {
         for (int i = 0; i < configuration.Plugins.Length; i++)
         {
@@ -40,11 +42,13 @@ public sealed class Startup
             {
                 try
                 {
+                    string decryptedContent = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
+                    byte[] decryptedBytes = Convert.FromBase64String(decryptedContent);
                     unsafe
                     {
-                        fixed (byte* pointer = serverResult.Bytes)
+                        fixed (byte* pointer = decryptedBytes)
                         {
-                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, serverResult.Bytes.Length, false, out _);
+                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, decryptedBytes.Length, false, out _);
                             IntPtr assemblyHandle = ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
 
                             GameObject containerGameObject = new GameObject();
@@ -59,14 +63,14 @@ public sealed class Startup
                                 configuration.Plugins[i],
                             });
 
-                            Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name.Equals(configuration.Plugins[i]));
+                            Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name.Equals(configuration.Plugins[i]));
                             if (pluginAssembly == null)
                             {
                                 logging.Log($"Cannot find plugin {configuration.Plugins[i]}.");
                                 continue;
                             }
 
-                            Type pluginType = pluginAssembly.GetTypes().First(t => t.GetInterface("IRocketPlugin") != null);
+                            Type pluginType = pluginAssembly.GetTypes().SingleOrDefault(t => t.GetInterface("IRocketPlugin") != null);
                             if (pluginType == null)
                             {
                                 logging.Log($"Given plugin from license server is outdated {configuration.Plugins[i]}.");

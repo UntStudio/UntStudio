@@ -18,6 +18,7 @@ public class AdminRequestResponse
         None,
         KeyValidationFailed,
         NameValidationFailed,
+        SubscriptionAlreadyExist,
         SpecifiedAdminCredentialsNotExsist,
         SpecifiedPluginKeyOrNameNotFound,
         NoOnePluginWithSpecifiedKeyNotFound,

@@ -32,6 +32,7 @@ public sealed class AllowUnauthenticatedHostAuthorizationFilter : IAuthorization
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
+        Console.WriteLine(context.HttpContext.Request.Host);
         if (context.HttpContext.User.Identity.IsAuthenticated == false && context.HttpContext.Request.Host.Host != host)
         {
             context.Result = new UnauthorizedResult();

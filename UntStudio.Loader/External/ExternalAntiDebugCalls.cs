@@ -23,18 +23,13 @@ internal static class ExternalAntiDebugCalls
         ProcessThreadCollection currentProcessThreads = Process.GetCurrentProcess().Threads;
         foreach (ProcessThread currentProcessThread in currentProcessThreads)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-
             IntPtr openHandle = OpenThread(ThreadAccess.SET_INFORMATION, false, (uint)currentProcessThread.Id);
-
             if (openHandle == IntPtr.Zero)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
                 continue;
             }
 
             HideFromDebugger(openHandle);
-
             CloseHandle(openHandle);
         }
     }

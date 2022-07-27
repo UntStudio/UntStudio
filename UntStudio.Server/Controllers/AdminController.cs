@@ -16,16 +16,16 @@ using static UntStudio.Server.Models.AdminRequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
-[AllowUnauthenticatedHost(KnownHosts.DeployedWebsiteURL)]
+//[AllowUnauthenticatedHost(KnownHosts.DeployedWebsiteURL)]
 public sealed class AdminController : ControllerBase
 {
-    private readonly PluginSubscriptionsDatabaseContext pluginsDatabase;
+    private readonly PluginSubscriptionsDatabaseContext subscriptionsDatabase;
 
 
 
     public AdminController(PluginSubscriptionsDatabaseContext pluginsDatabase)
     {
-        this.pluginsDatabase = pluginsDatabase;
+        this.subscriptionsDatabase = pluginsDatabase;
     }
 
 
@@ -61,9 +61,14 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.AllowedAddressesNotSpecified)));
         }
 
+        if (this.subscriptionsDatabase.Data.FirstOrDefault(s => s.LicenseKey.Equals(licenseKey) && s.Name.Equals(pluginName)) != null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SubscriptionAlreadyExist)));
+        }
+
         PluginSubscription plugin = new PluginSubscription(pluginName, licenseKey, allowedAddresses, DateTime.Now.AddDays(days));
-        this.pluginsDatabase.Data.Add(plugin);
-        await this.pluginsDatabase.SaveChangesAsync();
+        this.subscriptionsDatabase.Data.Add(plugin);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
@@ -99,10 +104,15 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
+        if (this.subscriptionsDatabase.Data.FirstOrDefault(s => s.LicenseKey.Equals(licenseKey) && s.Name.Equals(pluginName)) != null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SubscriptionAlreadyExist)));
+        }
+
         PluginSubscription plugin = new PluginSubscription(pluginName, licenseKey, allowedAddresses);
         plugin.SetFree();
-        this.pluginsDatabase.Data.Add(plugin);
-        await this.pluginsDatabase.SaveChangesAsync();
+        this.subscriptionsDatabase.Data.Add(plugin);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok(JsonConvert.SerializeObject(plugin));
     }
@@ -138,8 +148,8 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
-        if (plugin == null)
+        PluginSubscription plugin = null;
+        if ((plugin = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
         }
@@ -150,8 +160,8 @@ public sealed class AdminController : ControllerBase
         }
 
         plugin.SetBan();
-        this.pluginsDatabase.Data.Update(plugin);
-        await this.pluginsDatabase.SaveChangesAsync();
+        this.subscriptionsDatabase.Data.Update(plugin);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok();
     }
@@ -178,8 +188,8 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey));
-        if (plugins == null)
+        IEnumerable<PluginSubscription> plugins = null;
+        if ((plugins = this.subscriptionsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey))) == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
         }
@@ -189,8 +199,8 @@ public sealed class AdminController : ControllerBase
             plugin.SetBan();
         }
 
-        this.pluginsDatabase.Data.UpdateRange(plugins);
-        await this.pluginsDatabase.SaveChangesAsync();
+        this.subscriptionsDatabase.Data.UpdateRange(plugins);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok();
     }
@@ -217,15 +227,15 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
-        if (plugin == null)
+        PluginSubscription subscription = null;
+        if ((subscription = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
         }
 
-        plugin.SetUnban();
-        this.pluginsDatabase.Data.Update(plugin);
-        await this.pluginsDatabase.SaveChangesAsync();
+        subscription.SetUnban();
+        this.subscriptionsDatabase.Data.Update(subscription);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok();
     }
@@ -252,8 +262,8 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        IEnumerable<PluginSubscription> plugins = this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey));
-        if (plugins == null)
+        IEnumerable<PluginSubscription> plugins = null;
+        if ((plugins = this.subscriptionsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey))) == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NoOnePluginWithSpecifiedKeyNotFound)));
         }
@@ -263,8 +273,8 @@ public sealed class AdminController : ControllerBase
             plugin.SetUnban();
         }
 
-        this.pluginsDatabase.Data.UpdateRange(plugins);
-        await this.pluginsDatabase.SaveChangesAsync();
+        this.subscriptionsDatabase.Data.UpdateRange(plugins);
+        await this.subscriptionsDatabase.SaveChangesAsync();
 
         return Ok();
     }
@@ -300,16 +310,16 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.NameValidationFailed), Formatting.Indented));
         }
 
-        PluginSubscription plugin = this.pluginsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName));
-        if (plugin == null)
+        PluginSubscription subscription = null;
+        if ((subscription = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
         {
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
         }
 
-        return Ok(JsonConvert.SerializeObject(plugin));
+        return Ok(JsonConvert.SerializeObject(subscription));
     }
 
-    public IActionResult GetSubscriptions(string licenseKey)
+    public async Task<IActionResult> UpdateSubscriptionIP(string licenseKey, string pluginName, string newIP)
     {
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
@@ -331,10 +341,19 @@ public sealed class AdminController : ControllerBase
             return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
         }
 
-        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.Where(p => p.LicenseKey.Equals(licenseKey)).ToList(), Formatting.Indented));
+        PluginSubscription subscription = null;
+        if ((subscription = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
+        }
+
+        subscription.AllowedAddresses = newIP;
+        this.subscriptionsDatabase.Data.Update(subscription);
+        await this.subscriptionsDatabase.SaveChangesAsync();
+        return Ok();
     }
 
-    public IActionResult GetAllSubscriptions()
+    public async Task<IActionResult> AddSubscriptionDays(string licenseKey, string pluginName, int newDays)
     {
         if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
         {
@@ -346,6 +365,59 @@ public sealed class AdminController : ControllerBase
             return BadRequest();
         }
 
-        return Ok(JsonConvert.SerializeObject(this.pluginsDatabase.Data.ToList()));
+        licenseKey.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyStringValidator);
+
+        if (keyStringValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
+        }
+
+        PluginSubscription subscription = null;
+        if ((subscription = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
+        }
+
+        subscription.ExpirationTime = subscription.ExpirationTime.AddDays(newDays);
+        this.subscriptionsDatabase.Data.Update(subscription);
+        await this.subscriptionsDatabase.SaveChangesAsync();
+        return Ok();
+    }
+
+    public async Task<IActionResult> SetSubscriptionDays(string licenseKey, string pluginName, int newDays)
+    {
+        if (HttpContext.Request.Headers.TryGetValue(HeaderNames.UserAgent, out StringValues userAgentStringValue) == false)
+        {
+            return BadRequest();
+        }
+
+        if (userAgentStringValue != KnownHeaders.UserAgentAdminValue)
+        {
+            return BadRequest();
+        }
+
+        licenseKey.Rules()
+            .ContentNotNullOrWhiteSpace()
+            .ShouldBeEqualToCharactersLenght(KnownPluginKeyLenghts.Lenght)
+            .Return(out IStringValidator keyStringValidator);
+
+        if (keyStringValidator.Failed)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.KeyValidationFailed)));
+        }
+
+        PluginSubscription subscription = null;
+        if ((subscription = this.subscriptionsDatabase.Data.FirstOrDefault(p => p.LicenseKey.Equals(licenseKey) && p.Name.Equals(pluginName))) == null)
+        {
+            return Content(JsonConvert.SerializeObject(new AdminRequestResponse(AdminCodeResponse.SpecifiedPluginKeyOrNameNotFound)));
+        }
+
+        subscription.ExpirationTime = DateTime.Now.AddDays(newDays);
+        this.subscriptionsDatabase.Data.Update(subscription);
+        await this.subscriptionsDatabase.SaveChangesAsync();
+        return Ok();
     }
 }

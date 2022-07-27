@@ -1,0 +1,51 @@
+﻿@using UntStudio.Server.Models
+@model PluginSubscription
+
+@{
+	string errorMessage = TempData["ErrorMessage"] as string;
+	string warningMessage = TempData["WarningMessage"] as string;
+	string successMessage = TempData["SuccessMessage"] as string;
+}
+
+@if (Model != null)
+{
+	@using (Html.BeginForm("UpdateSubscriptionIP", "AdminsMenu", FormMethod.Post))
+	{
+		<input type="password" name="licenseKey" value=@Model.LicenseKey placeholder="License Key" />
+		<input type="text" name="pluginName" value=@Model.Name placeholder="Plugin Name" />
+		<input type="text" name="newIP" value=@Model.AllowedAddresses  placeholder="New IP" />
+		<input type="submit" value="Update Subscription IP" />
+	}
+}
+else
+{
+	@using (Html.BeginForm("UpdateSubscriptionIP", "AdminsMenu", new { newIP = string.Empty }, FormMethod.Post))
+	{
+		<input type="password" name="licenseKey" placeholder="License Key" />
+		<input type="text" name="pluginName" placeholder="Plugin Name" />
+		<input type="submit" value="Find Subscription" />
+	}
+}
+
+@if (string.IsNullOrWhiteSpace(errorMessage) == false)
+{
+	<font color="red">
+		<strong>@errorMessage</strong>
+	</font>
+	@Html.ActionLink("Click, to read help.", "Help")
+}
+
+@if (string.IsNullOrWhiteSpace(warningMessage) == false)
+{
+	<font color="orange">
+		<strong>@warningMessage</strong>
+	</font>
+}
+
+@if (string.IsNullOrWhiteSpace(successMessage) == false)
+{
+	<font color="green">
+		<strong>@successMessage</strong>
+	</font>
+}
+
