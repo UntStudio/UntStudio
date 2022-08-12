@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.External;
 using UntStudio.Bootstrapper.Models;

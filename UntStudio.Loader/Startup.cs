@@ -36,7 +36,7 @@ public sealed class Startup
             ServerResult serverResult = await server.UploadPluginAsync(configuration.LicenseKey, configuration.Plugins[i]);
             if (serverResult.HasResponse)
             {
-                translateServerResponse(serverResult.Response.Code);
+                logging.LogWarning(translateServerResponse(serverResult.Response.Code));
             }
             if (serverResult.HasBytes)
             {
@@ -66,14 +66,14 @@ public sealed class Startup
                             Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name.Equals(configuration.Plugins[i]));
                             if (pluginAssembly == null)
                             {
-                                logging.Log($"Cannot find plugin {configuration.Plugins[i]}.");
+                                logging.LogWarning($"Cannot find plugin {configuration.Plugins[i]}.");
                                 continue;
                             }
 
                             Type pluginType = pluginAssembly.GetTypes().SingleOrDefault(t => t.GetInterface("IRocketPlugin") != null);
                             if (pluginType == null)
                             {
-                                logging.Log($"Given plugin from license server is outdated {configuration.Plugins[i]}.");
+                                logging.LogWarning($"Given plugin from license server is outdated {configuration.Plugins[i]}.");
                                 continue;
                             }
 

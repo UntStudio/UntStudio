@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UntStudio.Loader.API;
@@ -52,12 +53,12 @@ public sealed class Server : IServer
         {
             if (response.StatusCode == HttpStatusCode.InternalServerError)
             {
-                this.logging.Log("License server is down, sorry about that.");
+                this.logging.LogWarning("License server is down, sorry about that.");
             }
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                this.logging.Log("Loader version is outdated.");
+                this.logging.LogWarning("Loader version is outdated.");
             }
 
             return new ServerResult(response.StatusCode);
@@ -66,12 +67,16 @@ public sealed class Server : IServer
         {
             if (ex.Status == WebExceptionStatus.ConnectFailure)
             {
-                this.logging.Log("Connection failure, server is down.");
+                this.logging.LogWarning("Connection failure, server is down.");
             }
             else
             {
-                this.logging.Log("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
+                this.logging.LogWarning("Couldn`t connect to license server. Please, check your internet connection and firewall rules.");
             }
+        }
+        catch (SocketException)
+        {
+            this.logging.LogWarning("Looks like license server is down or couldn`t connect to license server. Please, check your internet connection and firewall rules.");
         }
         catch (Exception ex)
         {

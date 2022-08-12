@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Net;
+using System.Net.Sockets;
+using System.Security;
 using System.Threading.Tasks;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.Models;
@@ -47,9 +49,13 @@ namespace UntStudio.Bootstrapper
                 }
                 return new ServerResult(response.StatusCode);
             }
+            catch (SocketException)
+            {
+                Rocket.Core.Logging.Logger.LogWarning("Looks like license server is down or couldn`t connect to license server. Please, check your internet connection and firewall rules.");
+            }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.LogException(ex, $"An error occured while getting loader.");
+                Rocket.Core.Logging.Logger.LogException(ex, $"An unknown error occured while getting loader.");
             }
             return null;
         }
@@ -94,13 +100,13 @@ namespace UntStudio.Bootstrapper
                 }
                 return new ServerResult(response.StatusCode);
             }
-            catch (WebException ex)
+            catch (SocketException)
             {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
+                Rocket.Core.Logging.Logger.LogWarning("Looks like license server is down or couldn`t connect to license server. Please, check your internet connection and firewall rules.");
             }
             catch (Exception ex)
             {
-                Rocket.Core.Logging.Logger.LogException(ex, "An error occured while getting loader.");
+                Rocket.Core.Logging.Logger.LogException(ex, "An unknown error occured while getting loader.");
             }
             return null;
         }

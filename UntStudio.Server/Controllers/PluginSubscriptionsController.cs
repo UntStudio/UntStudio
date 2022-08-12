@@ -72,13 +72,12 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.NameValidationFailed)));
         }
 
-        /*PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p => 
-            p.Key.Equals(key) 
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
-            && p.Name.Equals(name) 
-            && p.Free);*/
+        string pluginFile = null;
+        byte[] defaultBytes = null;
+        byte[] encryptedBytes = null;
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name)
             && p.Free);
         if (freePlugin != null)
@@ -98,16 +97,15 @@ public sealed class PluginSubscriptionsController : ControllerBase
                 return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBlockedByOwner)));
             }
 
-            string freePluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(freePluginFile)));
+             pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
+             defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+             await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
+            return Ok(Convert.ToBase64String(encryptedBytes));
         }
 
-        /*PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p => 
-            p.Key.Equals(key) 
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress)) 
-            && p.Name.Equals(name));*/
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name));
         if (plugin == null)
         {
@@ -129,12 +127,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBlockedByOwner)));
         }
 
-        string pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-        byte[] defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-        byte[] encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
+        pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
+        defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+        encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
         return Ok(Convert.ToBase64String(encryptedBytes));
-
-        //return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(pluginFile)));
     }
 
     /*public IActionResult Block(string name)
