@@ -1,4 +1,5 @@
-﻿using SDG.Unturned;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SDG.Unturned;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -18,13 +19,11 @@ public sealed class Startup
 {
     public Startup(IServiceProvider serviceProvider)
     {
-        initializeAsync
-        (
-            (ILoaderConfiguration)serviceProvider.GetService(typeof(ILoaderConfiguration)),
-            (IServer)serviceProvider.GetService(typeof(IServer)),
-            (ILogging)serviceProvider.GetService(typeof(ILogging)),
-            (IDecryptor)serviceProvider.GetService(typeof(IDecryptor))
-        );
+        initializeAsync(
+            serviceProvider.GetService<ILoaderConfiguration>(),
+            serviceProvider.GetService<IServer>(),
+            serviceProvider.GetService<ILogging>(),
+            serviceProvider.GetService<IDecryptor>());
     }
 
 

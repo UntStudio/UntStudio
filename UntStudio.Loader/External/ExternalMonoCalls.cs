@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace UntStudio.Loader.External;
 
-internal sealed class ExternalMonoCalls
+internal static class ExternalMonoCalls
 {
     [DllImport("__Internal", EntryPoint = "mono_image_open_from_data")]
     internal static extern IntPtr MonoImageOpenFromData(IntPtr dataHandle, int dataLenght, bool shouldCopy, out int status);
