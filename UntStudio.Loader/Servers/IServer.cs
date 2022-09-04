@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using UntStudio.Loader.API;
+using UntStudio.Loader.Models;
 
 namespace UntStudio.Loader.Servers;
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -11,6 +12,7 @@ using UntStudio.Server.Data;
 using UntStudio.Server.Encryptors;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
+using UntStudio.Server.Resolvers;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.RequestResponse;
 
@@ -19,20 +21,17 @@ namespace UntStudio.Server.Controllers;
 public sealed class PluginSubscriptionsController : ControllerBase
 {
     private readonly PluginSubscriptionsDatabaseContext database;
-
     private readonly IConfiguration configuration;
-
     private readonly IEncryptor encryptor;
+    private readonly IPEResolver peResolver;
 
-
-
-    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IEncryptor encryptor)
+    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IEncryptor encryptor, IPEResolver peResolver)
     {
         this.database = database;
         this.configuration = configuration;
         this.encryptor = encryptor;
+        this.peResolver = peResolver;
     }
-
 
 
     public async Task<IActionResult> Load(string name)
@@ -80,6 +79,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
             && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name)
             && p.Free);
+        byte[] brokenBytes = null;
         if (freePlugin != null)
         {
             if (freePlugin.Banned)
@@ -97,9 +97,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
                 return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBlockedByOwner)));
             }
 
-             pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-             defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-             await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
+            pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
+            defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+            brokenBytes = this.peResolver.Resolve(defaultBytes);
+
+            await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
             return Ok(Convert.ToBase64String(encryptedBytes));
         }
 
@@ -129,6 +131,8 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
         pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
         defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+        brokenBytes = this.peResolver.Resolve(defaultBytes);
+
         encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
         return Ok(Convert.ToBase64String(encryptedBytes));
     }

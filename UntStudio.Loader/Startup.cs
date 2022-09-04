@@ -4,14 +4,15 @@ using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UntStudio.Loader.API;
+using UntStudio.Loader.Models;
 using UntStudio.Loader.Decryptors;
 using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
-using static UntStudio.Loader.API.RequestResponse;
+using static UntStudio.Loader.Models.RequestResponse;
 using Object = UnityEngine.Object;
+using UntStudio.Loader.Solvers;
 
 namespace UntStudio.Loader;
 
@@ -20,15 +21,16 @@ public sealed class Startup
     public Startup(IServiceProvider serviceProvider)
     {
         initializeAsync(
-            serviceProvider.GetService<ILoaderConfiguration>(),
-            serviceProvider.GetService<IServer>(),
-            serviceProvider.GetService<ILogging>(),
-            serviceProvider.GetService<IDecryptor>());
+            serviceProvider.GetRequiredService<ILoaderConfiguration>(),
+            serviceProvider.GetRequiredService<IServer>(),
+            serviceProvider.GetRequiredService<ILogging>(),
+            serviceProvider.GetRequiredService<IDecryptor>(),
+            serviceProvider.GetRequiredService<IPESolver>());
     }
 
 
 
-    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor)
+    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor, IPESolver peSolver)
     {
         for (int i = 0; i < configuration.Plugins.Length; i++)
         {
@@ -42,12 +44,12 @@ public sealed class Startup
                 try
                 {
                     string decryptedContent = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
-                    byte[] decryptedBytes = Convert.FromBase64String(decryptedContent);
+                    byte[] bytes = peSolver.Solve(Convert.FromBase64String(decryptedContent));
                     unsafe
                     {
-                        fixed (byte* pointer = decryptedBytes)
+                        fixed (byte* pointer = bytes)
                         {
-                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, decryptedBytes.Length, false, out _);
+                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, bytes.Length, false, out _);
                             IntPtr assemblyHandle = ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
 
                             GameObject containerGameObject = new GameObject();

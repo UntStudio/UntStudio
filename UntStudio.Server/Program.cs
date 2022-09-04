@@ -10,6 +10,7 @@ using System;
 using UntStudio.Server.Data;
 using UntStudio.Server.Encryptors;
 using UntStudio.Server.Knowns;
+using UntStudio.Server.Resolvers;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PluginSubscriptionsDatabaseContext>(options =>
@@ -29,6 +30,7 @@ builder.Services.AddLogging(configure =>
 });*/
 
 builder.Services.AddSingleton<IEncryptor, Encryptor>();
+builder.Services.AddSingleton<IPEResolver, PEResolver>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient(KnownHttpClientNames.AdminsAPI, configure =>

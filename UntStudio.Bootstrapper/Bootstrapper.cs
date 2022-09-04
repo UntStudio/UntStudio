@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Security;
 using System.Threading.Tasks;
 using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.Models;

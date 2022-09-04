@@ -6,6 +6,7 @@ using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
+using UntStudio.Loader.Solvers;
 
 namespace UntStudio.Loader;
 
@@ -33,6 +34,7 @@ internal static class Loader
         builder.Services.AddSingleton<IServer, Server>();
         builder.Services.AddSingleton<ILoaderConfiguration>(new LoaderConfiguration(showPlugins, licenseKey, plugins));
         builder.Services.AddSingleton<IDecryptor, Decryptor>();
+        builder.Services.AddSingleton<IPESolver, PESolver>();
         builder.AddLogging(new ConsoleLogging());
         IServiceProvider serviceProvider = builder.Build();
 
