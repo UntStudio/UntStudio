@@ -4,10 +4,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using UntStudio.Bootstrapper.API;
 using UntStudio.Bootstrapper.External;
 using UntStudio.Bootstrapper.Models;
-using static UntStudio.Bootstrapper.API.RequestResponse;
+using static UntStudio.Bootstrapper.Models.RequestResponse;
 
 namespace UntStudio.Bootstrapper
 {

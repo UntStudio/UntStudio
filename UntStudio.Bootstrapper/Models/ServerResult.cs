@@ -1,8 +1,7 @@
 ﻿using System.Net;
-using UntStudio.Bootstrapper.Models;
-using static UntStudio.Bootstrapper.API.RequestResponse;
+using static UntStudio.Bootstrapper.Models.RequestResponse;
 
-namespace UntStudio.Bootstrapper.API
+namespace UntStudio.Bootstrapper.Models
 {
     internal sealed class ServerResult
     {

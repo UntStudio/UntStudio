@@ -23,7 +23,6 @@ namespace UntStudio.Server.Resolvers
 
                 return stream.ToArray();
             }
-            return Array.Empty<byte>();
         }
     }
 }

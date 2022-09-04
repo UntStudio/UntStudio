@@ -44,7 +44,6 @@ namespace UntStudio.Loader.Solvers
 
                 return stream.ToArray();
             }
-            return Array.Empty<byte>();
         }
     }
 }
