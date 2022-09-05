@@ -58,6 +58,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UntStudio.Bootstrapper.API\UntStudio.Bootstrapper.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>

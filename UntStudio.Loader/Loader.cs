@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using UntStudio.Loader.Decryptors;
 using UntStudio.Loader.External;
+using UntStudio.Loader.Activators;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
@@ -35,6 +36,8 @@ internal static class Loader
         builder.Services.AddSingleton<ILoaderConfiguration>(new LoaderConfiguration(showPlugins, licenseKey, plugins));
         builder.Services.AddSingleton<IDecryptor, Decryptor>();
         builder.Services.AddSingleton<IPEBit, PEBit>();
+        builder.Services.AddSingleton<IRocketModPluginActivator, RocketModPluginActivator>();
+        builder.Services.AddSingleton<IOpenModPluginActivator, OpenModPluginActivator>();
         builder.AddLogging(new ConsoleLogging());
         IServiceProvider serviceProvider = builder.Build();
 

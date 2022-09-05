@@ -1,18 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SDG.Unturned;
 using System;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
-using UntStudio.Loader.Models;
+using UntStudio.Loader.Activators;
 using UntStudio.Loader.Decryptors;
-using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
+using UntStudio.Loader.Models;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
-using static UntStudio.Loader.Models.RequestResponse;
-using Object = UnityEngine.Object;
 using UntStudio.Loader.Solvers;
+using static UntStudio.Loader.Models.RequestResponse;
 
 namespace UntStudio.Loader;
 
@@ -25,12 +21,18 @@ public sealed class Startup
             serviceProvider.GetRequiredService<IServer>(),
             serviceProvider.GetRequiredService<ILogging>(),
             serviceProvider.GetRequiredService<IDecryptor>(),
-            serviceProvider.GetRequiredService<IPEBit>());
+            serviceProvider.GetRequiredService<IPEBit>(),
+            serviceProvider.GetRequiredService<IRocketModPluginActivator>());
     }
 
 
 
-    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor, IPEBit peSolver)
+    private async void initializeAsync(ILoaderConfiguration configuration,
+        IServer server,
+        ILogging logging, 
+        IDecryptor decryptor, 
+        IPEBit peSolver, 
+        IRocketModPluginActivator rocketModPluginActivator)
     {
         for (int i = 0; i < configuration.Plugins.Length; i++)
         {
@@ -45,49 +47,10 @@ public sealed class Startup
                 {
                     string decryptedContent = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
                     byte[] bytes = peSolver.Unbit(Convert.FromBase64String(decryptedContent));
-                    unsafe
-                    {
-                        fixed (byte* pointer = bytes)
-                        {
-                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, bytes.Length, false, out _);
-                            IntPtr assemblyHandle = ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
+                    rocketModPluginActivator.Activate(bytes, configuration.Plugins[i]);
 
-                            GameObject containerGameObject = new GameObject();
-                            MethodInfo createGameObjectMethodInfo = typeof(GameObject).GetMethod("Internal_CreateGameObject",
-                                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
-                            MethodInfo addComponentMethodInfo = typeof(GameObject).GetMethod("Internal_AddComponentWithType",
-                                BindingFlags.Instance | BindingFlags.NonPublic);
-
-                            createGameObjectMethodInfo.Invoke(null, new object[]
-                            {
-                                containerGameObject,
-                                configuration.Plugins[i],
-                            });
-
-                            Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name.Equals(configuration.Plugins[i]));
-                            if (pluginAssembly == null)
-                            {
-                                logging.LogWarning($"Cannot find plugin {configuration.Plugins[i]}.");
-                                continue;
-                            }
-
-                            Type pluginType = pluginAssembly.GetTypes().SingleOrDefault(t => t.GetInterface("IRocketPlugin") != null);
-                            if (pluginType == null)
-                            {
-                                logging.LogWarning($"Given plugin from license server is outdated {configuration.Plugins[i]}.");
-                                continue;
-                            }
-
-                            addComponentMethodInfo.Invoke(containerGameObject, new object[]
-                            {
-                                pluginType,
-                            });
-
-                            Object.DontDestroyOnLoad(containerGameObject);
-                            PluginAdvertising.Get().AddPlugin(configuration.Plugins[i]);
-                            logging.Log($"Plugin {configuration.Plugins[i]} Loaded!", ConsoleColor.Green);
-                        }
-                    }
+                    PluginAdvertising.Get().AddPlugin(configuration.Plugins[i]);
+                    logging.Log($"Plugin {configuration.Plugins[i]} Loaded!", ConsoleColor.Green);
                 }
                 catch (Exception ex)
                 {
