@@ -1,9 +1,10 @@
 ﻿using System.Net;
-using static UntStudio.Bootstrapper.Models.RequestResponse;
+using UntStudio.API.Bootstrapper.Models;
+using static UntStudio.API.Bootstrapper.Models.RequestResponse;
 
-namespace UntStudio.Bootstrapper.Models
+namespace UntStudio.API.Bootstrapper.Models
 {
-    internal sealed class ServerResult
+    public sealed class ServerResult
     {
         public RequestResponse Response;
 

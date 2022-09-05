@@ -1,6 +1,6 @@
-﻿namespace UntStudio.Bootstrapper.Models
+﻿namespace UntStudio.API.Bootstrapper.Models
 {
-    internal class LoaderEntryPoint
+    public sealed class LoaderEntryPoint
     {
         public string Namespace;
 

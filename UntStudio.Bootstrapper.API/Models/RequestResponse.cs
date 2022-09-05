@@ -1,6 +1,6 @@
-﻿namespace UntStudio.Bootstrapper.Models
+﻿namespace UntStudio.API.Bootstrapper.Models
 {
-    internal class RequestResponse
+    public sealed class RequestResponse
     {
         public CodeResponse Code;
 

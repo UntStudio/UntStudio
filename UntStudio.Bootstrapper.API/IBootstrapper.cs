@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using UntStudio.Bootstrapper.Models;
+using UntStudio.API.Bootstrapper.Models;
 
-namespace UntStudio.Bootstrapper
+namespace UntStudio.Bootstrapper.API
 {
-    internal interface IBootstrapper
+    public interface IBootstrapper
     {
         Task<ServerResult> UploadLoaderAsync(string key);
 
