@@ -25,12 +25,12 @@ public sealed class Startup
             serviceProvider.GetRequiredService<IServer>(),
             serviceProvider.GetRequiredService<ILogging>(),
             serviceProvider.GetRequiredService<IDecryptor>(),
-            serviceProvider.GetRequiredService<IPESolver>());
+            serviceProvider.GetRequiredService<IPEBit>());
     }
 
 
 
-    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor, IPESolver peSolver)
+    private async void initializeAsync(ILoaderConfiguration configuration, IServer server, ILogging logging, IDecryptor decryptor, IPEBit peSolver)
     {
         for (int i = 0; i < configuration.Plugins.Length; i++)
         {
@@ -44,7 +44,7 @@ public sealed class Startup
                 try
                 {
                     string decryptedContent = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
-                    byte[] bytes = peSolver.Solve(Convert.FromBase64String(decryptedContent));
+                    byte[] bytes = peSolver.Unbit(Convert.FromBase64String(decryptedContent));
                     unsafe
                     {
                         fixed (byte* pointer = bytes)
@@ -85,11 +85,13 @@ public sealed class Startup
 
                             Object.DontDestroyOnLoad(containerGameObject);
                             PluginAdvertising.Get().AddPlugin(configuration.Plugins[i]);
+                            logging.Log($"Plugin {configuration.Plugins[i]} Loaded!", ConsoleColor.Green);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
+                    logging.LogWarning(ex.Message);
                     logging.LogException(ex, $"An not supported error ocurred while loading plugin, please contant with Administrators! Plugin: {configuration.Plugins[i]}.");
                     continue;
                 }

@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using System;
+using UntStudio.Server.Bits;
 using UntStudio.Server.Data;
 using UntStudio.Server.Encryptors;
 using UntStudio.Server.Knowns;
-using UntStudio.Server.Resolvers;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PluginSubscriptionsDatabaseContext>(options =>
@@ -30,7 +30,7 @@ builder.Services.AddLogging(configure =>
 });*/
 
 builder.Services.AddSingleton<IEncryptor, Encryptor>();
-builder.Services.AddSingleton<IPEResolver, PEResolver>();
+builder.Services.AddSingleton<IPEBit, PEBit>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient(KnownHttpClientNames.AdminsAPI, configure =>
@@ -44,8 +44,8 @@ builder.Services.AddHttpClient(KnownHttpClientNames.AdminsAPI, configure =>
 /*builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.KnownProxies.Add(IPAddress.Parse("10.0.0.100"));
-});
-*/
+});*/
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(configure =>
     {

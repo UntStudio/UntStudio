@@ -12,7 +12,7 @@ using UntStudio.Server.Data;
 using UntStudio.Server.Encryptors;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
-using UntStudio.Server.Resolvers;
+using UntStudio.Server.Bits;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.RequestResponse;
 
@@ -23,14 +23,14 @@ public sealed class PluginSubscriptionsController : ControllerBase
     private readonly PluginSubscriptionsDatabaseContext database;
     private readonly IConfiguration configuration;
     private readonly IEncryptor encryptor;
-    private readonly IPEResolver peResolver;
+    private readonly IPEBit peBit;
 
-    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IEncryptor encryptor, IPEResolver peResolver)
+    public PluginSubscriptionsController(PluginSubscriptionsDatabaseContext database, IConfiguration configuration, IEncryptor encryptor, IPEBit peResolver)
     {
         this.database = database;
         this.configuration = configuration;
         this.encryptor = encryptor;
-        this.peResolver = peResolver;
+        this.peBit = peResolver;
     }
 
 
@@ -76,7 +76,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
         byte[] encryptedBytes = null;
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
+            //&& p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name)
             && p.Free);
         byte[] brokenBytes = null;
@@ -99,15 +99,15 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
             pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
             defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-            brokenBytes = this.peResolver.Resolve(defaultBytes);
+            brokenBytes = this.peBit.Bit(defaultBytes);
 
-            await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
+            encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
             return Ok(Convert.ToBase64String(encryptedBytes));
         }
 
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
+            //&& p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name));
         if (plugin == null)
         {
@@ -131,7 +131,7 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
         pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
         defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-        brokenBytes = this.peResolver.Resolve(defaultBytes);
+        brokenBytes = this.peBit.Bit(defaultBytes);
 
         encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
         return Ok(Convert.ToBase64String(encryptedBytes));

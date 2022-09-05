@@ -25,7 +25,7 @@ namespace UntStudio.Bootstrapper
 
                 if (loaderServerResult == null)
                 {
-                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader #1!");
                     return;
                 }
 
@@ -38,7 +38,7 @@ namespace UntStudio.Bootstrapper
                 ServerResult loaderEntryPointServerResult = await bootstrapper.GetLoaderEntryPointAsync(configuration.LicenseKey);
                 if (loaderEntryPointServerResult == null)
                 {
-                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader #2!");
                     return;
                 }
 
@@ -50,7 +50,7 @@ namespace UntStudio.Bootstrapper
 
                 if (loaderEntryPointServerResult.HasLoaderEntryPoint == false)
                 {
-                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader!");
+                    Rocket.Core.Logging.Logger.LogWarning("Cannot load loader #3!");
                     return;
                 }
 

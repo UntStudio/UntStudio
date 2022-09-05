@@ -34,7 +34,7 @@ internal static class Loader
         builder.Services.AddSingleton<IServer, Server>();
         builder.Services.AddSingleton<ILoaderConfiguration>(new LoaderConfiguration(showPlugins, licenseKey, plugins));
         builder.Services.AddSingleton<IDecryptor, Decryptor>();
-        builder.Services.AddSingleton<IPESolver, PESolver>();
+        builder.Services.AddSingleton<IPEBit, PEBit>();
         builder.AddLogging(new ConsoleLogging());
         IServiceProvider serviceProvider = builder.Build();
 
