@@ -1,10 +1,14 @@
-﻿namespace UntStudio.Loader.Activators
+﻿using System;
+using System.Reflection;
+using UntStudio.Loader.API;
+
+namespace UntStudio.Loader.Activators
 {
     public sealed class OpenModPluginActivator : IOpenModPluginActivator
     {
-        public void Activate(byte[] bytes, string name)
+        public void Activate(IntPtr handle, Assembly assembly)
         {
-
+            Events.OnLoadAssemblyRequested?.Invoke(handle, assembly);
         }
     }
 }

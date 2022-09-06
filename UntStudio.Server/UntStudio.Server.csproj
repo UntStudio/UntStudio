@@ -21,7 +21,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.5" />
-    <PackageReference Include="XAct.Core.PCL" Version="0.0.5014" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,8 @@
-﻿namespace UntStudio.Loader.Activators
+﻿using System.Reflection;
+
+namespace UntStudio.Loader.Activators
 {
-    public interface IPluginActivator
+    public interface IPluginActivator : IActivator<Assembly>
     {
-        void Activate(byte[] bytes, string name);
     }
 }
