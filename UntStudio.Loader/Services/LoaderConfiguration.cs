@@ -1,4 +1,6 @@
-﻿namespace UntStudio.Loader.Services;
+﻿using UntStudio.Loader.API.Services;
+
+namespace UntStudio.Loader.Services;
 
 internal sealed class LoaderConfiguration : ILoaderConfiguration
 {

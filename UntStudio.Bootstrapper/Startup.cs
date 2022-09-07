@@ -2,27 +2,36 @@
 using Rocket.Core;
 using Rocket.Core.Plugins;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using UntStudio.API.Bootstrapper.Models;
 using UntStudio.Bootstrapper.API;
-using UntStudio.Bootstrapper.External;
 using UntStudio.Bootstrapper.Models;
+using UntStudio.External.API;
+using UntStudio.Loader.API;
 using static UntStudio.API.Bootstrapper.Models.RequestResponse;
 
 namespace UntStudio.Bootstrapper
 {
     internal sealed class Startup : RocketPlugin
     {
+        private HashSet<IntPtr> assemblies;
+
         protected override void Load()
         {
+            assemblies = new HashSet<IntPtr>();
+
             R.Plugins.OnPluginsLoaded += onPluginsLoadedAsync;
+            Events.OnLoadAssemblyRequested += onLoadAssemblyRequested;
         }
 
         protected override void Unload()
         {
             R.Plugins.OnPluginsLoaded -= onPluginsLoadedAsync;
+            Events.OnLoadAssemblyRequested -= onLoadAssemblyRequested;
         }
 
 
@@ -99,8 +108,9 @@ namespace UntStudio.Bootstrapper
                     {
                         fixed (byte* pointer = loaderServerResult.Bytes)
                         {
-                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, false, out _);
-                            ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, out _);
+                            IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, true, IntPtr.Zero);
+                            //ExternalMonoCalls.MonoAssemblyLoadFromFull(imageHandle, string.Empty, IntPtr.Zero, false);
+                            ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, IntPtr.Zero);
 
                             IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle,
                                 loaderEntryPointServerResult.LoaderEntryPoint.Namespace,
@@ -126,6 +136,14 @@ namespace UntStudio.Bootstrapper
             catch (Exception ex)
             {
                 Rocket.Core.Logging.Logger.LogException(ex, "An error ocurred while loading bootsrapper!");
+            }
+        }
+
+        private void onLoadAssemblyRequested(IntPtr assemblyHandle, Assembly assembly, PluginFramework pluginFramework)
+        {
+            if (pluginFramework.Equals(PluginFramework.RocketMod))
+            {
+                ExternalMonoCalls.MonoAssemblyClose(assemblyHandle);
             }
         }
     }

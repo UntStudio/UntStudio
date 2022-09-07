@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static UntStudio.Loader.External.ExternalAntiDebugCalls.ExternalWindowsStructs;
+using static UntStudio.External.API.ExternalAntiDebugCalls.ExternalWindowsStructs;
 
-namespace UntStudio.Loader.External;
+namespace UntStudio.External.API;
 
-internal static class ExternalAntiDebugCalls
+public static class ExternalAntiDebugCalls
 {
     [DllImport("ntdll.dll")]
     internal static extern NtStatus NtSetInformationThread(IntPtr processHandle, ThreadInformationClass @class, IntPtr informationHandle, int length);
@@ -18,7 +18,7 @@ internal static class ExternalAntiDebugCalls
 
 
 
-    internal static void HideThreadsInCurrentThread()
+    public static void HideThreadsInCurrentThread()
     {
         ProcessThreadCollection currentProcessThreads = Process.GetCurrentProcess().Threads;
         foreach (ProcessThread currentProcessThread in currentProcessThreads)
@@ -34,7 +34,7 @@ internal static class ExternalAntiDebugCalls
         }
     }
 
-    internal static bool HideFromDebugger(IntPtr threadHandle)
+    public static bool HideFromDebugger(IntPtr threadHandle)
     {
         NtStatus status = NtSetInformationThread(threadHandle, ThreadInformationClass.ThreadHideFromDebugger, IntPtr.Zero, 0);
         if (status == NtStatus.Success)
@@ -45,7 +45,7 @@ internal static class ExternalAntiDebugCalls
         return false;
     }
 
-    internal static class ExternalWindowsStructs
+    public static class ExternalWindowsStructs
     {
         internal enum ThreadInformationClass
         {

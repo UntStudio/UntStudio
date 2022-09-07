@@ -1,4 +1,4 @@
-﻿namespace UntStudio.Loader.Services;
+﻿namespace UntStudio.Loader.API.Services;
 
 public interface ILoaderConfiguration
 {

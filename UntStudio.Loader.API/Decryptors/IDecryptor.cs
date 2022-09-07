@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace UntStudio.Loader.Decryptors
+namespace UntStudio.Loader.API.Decryptors
 {
     public interface IDecryptor
     {

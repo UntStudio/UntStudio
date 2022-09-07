@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
+using UntStudio.Loader.API.Decryptors;
 
 namespace UntStudio.Loader.Decryptors
 {

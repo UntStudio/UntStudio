@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using UntStudio.Loader.Logging;
+using UntStudio.Loader.API.Services;
 
 namespace UntStudio.Loader.Services;
 

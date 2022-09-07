@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-namespace UntStudio.Loader.API
-{
-    public static class Events
-    {
-        public static Action<IntPtr, Assembly> OnLoadAssemblyRequested;
+namespace UntStudio.Loader.API;
 
-        public static Action<IntPtr> OnReleaseAssemblyHandleRequested;
-    }
+public static class Events
+{
+    public static Action<IntPtr, Assembly, PluginFramework> OnLoadAssemblyRequested;
 }

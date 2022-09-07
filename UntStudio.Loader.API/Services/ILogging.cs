@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UntStudio.Loader.Logging;
+namespace UntStudio.Loader.API.Services;
 
 public interface ILogging
 {

@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using UntStudio.Loader.Models;
+using UntStudio.Loader.API.Models;
 
-namespace UntStudio.Loader.Servers;
+namespace UntStudio.Loader.API;
 
 public interface IServer
 {

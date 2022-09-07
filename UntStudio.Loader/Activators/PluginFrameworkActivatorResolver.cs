@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using UntStudio.Loader.API.Activators;
 
 namespace UntStudio.Loader.Activators
 {

@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using UntStudio.Loader.Logging;
 
-namespace UntStudio.Loader.Services;
+namespace UntStudio.Loader.API.Services;
 
-internal interface ILoaderBuilder
+public interface ILoaderBuilder
 {
     IServiceCollection Services { get; }
 

@@ -59,6 +59,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UntStudio.Bootstrapper.API\UntStudio.Bootstrapper.API.csproj" />
+    <ProjectReference Include="..\UntStudio.External.API\UntStudio.External.API.csproj" />
+    <ProjectReference Include="..\UntStudio.Loader.API\UntStudio.Loader.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

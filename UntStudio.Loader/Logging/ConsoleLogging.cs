@@ -1,4 +1,5 @@
 ﻿using System;
+using UntStudio.Loader.API.Services;
 
 namespace UntStudio.Loader.Logging;
 
@@ -14,11 +15,11 @@ public class ConsoleLogging : ILogging
 
     public void LogWarning(string message)
     {
-        Log($"[WARN]: {message}", ConsoleColor.Yellow);
+        Log($"[WRN]: {message}", ConsoleColor.Yellow);
     }
 
     public void LogException(Exception ex, string message)
     {
-        Log($"[EXCEPTION]: {message} \nInfo: {ex}", ConsoleColor.Red);
+        Log($"[EXC]: {message} \nInfo: {ex}", ConsoleColor.Red);
     }
 }

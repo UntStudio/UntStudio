@@ -1,9 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
+using UntStudio.External.API;
 using UntStudio.Loader.Activators;
+using UntStudio.Loader.API;
+using UntStudio.Loader.API.Activators;
+using UntStudio.Loader.API.Decryptors;
+using UntStudio.Loader.API.PortableExecutable;
+using UntStudio.Loader.API.Services;
 using UntStudio.Loader.Decryptors;
-using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;

@@ -5,8 +5,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using UntStudio.Loader.Models;
-using UntStudio.Loader.Logging;
+using UntStudio.Loader.API;
+using UntStudio.Loader.API.Models;
+using UntStudio.Loader.API.Services;
 
 namespace UntStudio.Loader.Servers;
 

@@ -3,7 +3,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UntStudio.Loader.Logging;
+using UntStudio.Loader.API;
+using UntStudio.Loader.API.Activators;
+using UntStudio.Loader.API.Services;
 using Object = UnityEngine.Object;
 
 namespace UntStudio.Loader.Activators
@@ -29,8 +31,7 @@ namespace UntStudio.Loader.Activators
             createGameObjectMethodInfo.Invoke(null, new object[]
             {
                 containerGameObject,
-                //string.Empty,
-                assembly.GetName().Name
+                string.Empty,
             });
 
             Type[] types = null;
@@ -57,6 +58,7 @@ namespace UntStudio.Loader.Activators
 
             Object.DontDestroyOnLoad(containerGameObject);
             PluginAdvertising.Get().AddPlugin(assembly.GetName().Name);
+            Events.OnLoadAssemblyRequested?.Invoke(assemblyHandle, assembly, PluginFramework.RocketMod);
         }
     }
 }

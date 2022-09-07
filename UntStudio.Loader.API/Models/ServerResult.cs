@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using static UntStudio.Loader.Models.RequestResponse;
+using static UntStudio.Loader.API.Models.RequestResponse;
 
-namespace UntStudio.Loader.Models;
+namespace UntStudio.Loader.API.Models;
 
 public class ServerResult
 {

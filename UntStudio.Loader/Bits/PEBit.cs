@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using UntStudio.Loader.API.PortableExecutable;
 
 namespace UntStudio.Loader.Solvers
 {

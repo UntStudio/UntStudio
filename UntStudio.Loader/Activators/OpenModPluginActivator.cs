@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using UntStudio.Loader.API;
+using UntStudio.Loader.API.Activators;
 
 namespace UntStudio.Loader.Activators
 {
@@ -8,7 +9,7 @@ namespace UntStudio.Loader.Activators
     {
         public void Activate(IntPtr handle, Assembly assembly)
         {
-            Events.OnLoadAssemblyRequested?.Invoke(handle, assembly);
+            Events.OnLoadAssemblyRequested?.Invoke(handle, assembly, PluginFramework.OpenMod);
         }
     }
 }

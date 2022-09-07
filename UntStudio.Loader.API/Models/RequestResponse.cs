@@ -1,4 +1,4 @@
-﻿namespace UntStudio.Loader.Models;
+﻿namespace UntStudio.Loader.API.Models;
 
 public class RequestResponse
 {
