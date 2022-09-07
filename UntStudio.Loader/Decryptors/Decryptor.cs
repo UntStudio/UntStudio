@@ -18,31 +18,28 @@ namespace UntStudio.Loader.Decryptors
 
 
 
-		public async Task<string> DecryptAsync(byte[] bytes, string key)
-		{
-			byte[] decryptedBytes = null;
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				using (RijndaelManaged aes = new RijndaelManaged())
-				{
-					aes.KeySize = 256;
-					aes.BlockSize = 128;
-					Rfc2898DeriveBytes keyRfc = new Rfc2898DeriveBytes(key, saltBytes, 1000);
-					aes.Key = keyRfc.GetBytes(aes.KeySize / 8);
-					aes.IV = keyRfc.GetBytes(aes.BlockSize / 8);
-					aes.Mode = CipherMode.CBC;
+        public async Task<byte[]> DecryptAsync(byte[] bytes, string key)
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                using (RijndaelManaged aes = new RijndaelManaged())
+                {
+                    aes.KeySize = 256;
+                    aes.BlockSize = 128;
+                    Rfc2898DeriveBytes keyRfc = new Rfc2898DeriveBytes(key, saltBytes, 1000);
+                    aes.Key = keyRfc.GetBytes(aes.KeySize / 8);
+                    aes.IV = keyRfc.GetBytes(aes.BlockSize / 8);
+                    aes.Mode = CipherMode.CBC;
 
-					using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
-					{
-						await cryptoStream.WriteAsync(bytes, 0, bytes.Length);
-						cryptoStream.Close();
-					}
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        await cryptoStream.WriteAsync(bytes, 0, bytes.Length);
+                        cryptoStream.Close();
+                    }
 
-					decryptedBytes = memoryStream.ToArray();
-				}
-			}
-
-			return Encoding.UTF8.GetString(decryptedBytes);
-		}
-	}
+                    return memoryStream.ToArray();
+                }
+            }
+        }
+    }
 }

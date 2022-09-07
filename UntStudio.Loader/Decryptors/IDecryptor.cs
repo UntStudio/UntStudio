@@ -4,6 +4,6 @@ namespace UntStudio.Loader.Decryptors
 {
     public interface IDecryptor
     {
-        Task<string> DecryptAsync(byte[] bytes, string key);
+        Task<byte[]> DecryptAsync(byte[] bytes, string key);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,8 +21,7 @@ namespace UntStudio.Server.Encryptors
 
 		public async Task<byte[]> EncryptContentAsync(string text, string key)
 		{
-			byte[] decryptBytes = Encoding.UTF8.GetBytes(text);
-			byte[] encryptedBytes = null;
+			byte[] decryptBytes = Convert.FromBase64String(text);
 			using (MemoryStream memoryStream = new MemoryStream())
 			{
 				using (RijndaelManaged aes = new RijndaelManaged())
@@ -38,10 +38,9 @@ namespace UntStudio.Server.Encryptors
 						await cryptoStream.WriteAsync(decryptBytes, 0, decryptBytes.Length);
 						cryptoStream.Close();
 					}
-					encryptedBytes = memoryStream.ToArray();
+					return memoryStream.ToArray();
 				}
 			}
-			return encryptedBytes;
 		}
 	}
 }

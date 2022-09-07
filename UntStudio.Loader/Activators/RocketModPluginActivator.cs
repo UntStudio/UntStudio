@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SDG.Unturned;
+using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -28,19 +29,25 @@ namespace UntStudio.Loader.Activators
             createGameObjectMethodInfo.Invoke(null, new object[]
             {
                 containerGameObject,
-                string.Empty,
+                //string.Empty,
+                assembly.GetName().Name
             });
 
-/*            Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name.Equals(name));
-            if (pluginAssembly == null)
+            Type[] types = null;
+            try
             {
-                logging.LogWarning($"Cannot find plugin {name}.");
-            }*/
+                types = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                types = ex.Types;
+            }
 
-            Type pluginType = assembly.GetTypes().SingleOrDefault(t => t.GetInterface("IRocketPlugin") != null);
+            Type pluginType = types.FirstOrDefault(t => t.GetInterface("IRocketPlugin") != null);
             if (pluginType == null)
             {
-                logging.LogWarning($"Given plugin from license server is outdated {assembly.GetName().Name}.");
+                logging.LogWarning($"Plugin from license server is outdated {assembly.GetName().Name}.");
+                return;
             }
 
             addComponentMethodInfo.Invoke(containerGameObject, new object[]
@@ -49,6 +56,7 @@ namespace UntStudio.Loader.Activators
             });
 
             Object.DontDestroyOnLoad(containerGameObject);
+            PluginAdvertising.Get().AddPlugin(assembly.GetName().Name);
         }
     }
 }

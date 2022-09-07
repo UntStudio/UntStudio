@@ -3,14 +3,17 @@ using SDG.Unturned;
 using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 using UntStudio.Loader.Activators;
 using UntStudio.Loader.Decryptors;
+using UntStudio.Loader.External;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Models;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
 using UntStudio.Loader.Solvers;
 using static UntStudio.Loader.Models.RequestResponse;
+using Object = UnityEngine.Object;
 
 namespace UntStudio.Loader;
 
@@ -34,7 +37,7 @@ public sealed class Startup
         IServer server,
         ILogging logging, 
         IDecryptor decryptor, 
-        IPEBit peSolver,
+        IPEBit peBit,
         IMonoActivator monoActivator,
         IPluginFrameworkActivatorResolver pluginFrameworkActivatorResolver)
     {
@@ -50,16 +53,17 @@ public sealed class Startup
             {
                 try
                 {
-                    string decryptedContent = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
-                    byte[] bytes = peSolver.Unbit(Convert.FromBase64String(decryptedContent));
-                    IntPtr assemblyHandle = monoActivator.Activate(bytes);
-                    Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name.Equals(pluginName));
+                    logging.Log("Assemblies before loading: " + AppDomain.CurrentDomain.GetAssemblies().Count(), ConsoleColor.Yellow);
+                    logging.Log("Assemblies: " + String.Join("\n", AppDomain.CurrentDomain.GetAssemblies().Where(a => a != null).Select(a => a.GetName().Name)));
+
+                    byte[] decryptedBytes = await decryptor.DecryptAsync(serverResult.Bytes, configuration.LicenseKey);
+                    byte[] unprotectedBytes = peBit.Unbit(decryptedBytes);
+
+                    IntPtr assemblyHandle = monoActivator.Activate(unprotectedBytes);
+                    Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name.Equals(pluginName));
                     pluginFrameworkActivatorResolver.Resolve(pluginAssembly).Activate(assemblyHandle, pluginAssembly);
 
-                    //rocketModPluginActivator.Activate(bytes, configuration.Plugins[i]);
-
-                    PluginAdvertising.Get().AddPlugin(pluginName);
-                    logging.Log($"Plugin {pluginName} Loaded!", ConsoleColor.Green);
+                    logging.Log($"Plugin {pluginName} is Loaded!", ConsoleColor.Green);
                 }
                 catch (UnsupportedPluginFrameworkException)
                 {
@@ -68,7 +72,7 @@ public sealed class Startup
                 }
                 catch (Exception ex)
                 {
-                    logging.LogWarning(ex.Message);
+                    logging.LogWarning("Exception message: " + ex.Message);
                     logging.LogException(ex, $"An not supported error ocurred while loading plugin, please contant with Administrators! Plugin: {pluginName}.");
                     continue;
                 }

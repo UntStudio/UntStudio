@@ -17,12 +17,12 @@ namespace UntStudio.Bootstrapper
     {
         protected override void Load()
         {
-            R.Plugins.OnPluginsLoaded += onPluginsLoaded;
+            R.Plugins.OnPluginsLoaded += onPluginsLoadedAsync;
         }
 
         protected override void Unload()
         {
-            R.Plugins.OnPluginsLoaded -= onPluginsLoaded;
+            R.Plugins.OnPluginsLoaded -= onPluginsLoadedAsync;
         }
 
 
@@ -45,7 +45,7 @@ namespace UntStudio.Bootstrapper
             };
         }
 
-        private async void onPluginsLoaded()
+        private async void onPluginsLoadedAsync()
         {
             try
             {

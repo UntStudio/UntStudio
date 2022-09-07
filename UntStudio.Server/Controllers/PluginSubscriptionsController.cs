@@ -15,6 +15,7 @@ using UntStudio.Server.Models;
 using UntStudio.Server.Bits;
 using UntStudio.Server.Strings;
 using static UntStudio.Server.Models.RequestResponse;
+using System.Text;
 
 namespace UntStudio.Server.Controllers;
 
@@ -99,10 +100,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
             pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
             defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-            brokenBytes = this.peBit.Bit(defaultBytes);
+            //brokenBytes = this.peBit.Bit(defaultBytes);
 
-            encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
-            return Ok(Convert.ToBase64String(encryptedBytes));
+            //encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
+            return Ok(Convert.ToBase64String(defaultBytes));
         }
 
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
@@ -131,9 +132,10 @@ public sealed class PluginSubscriptionsController : ControllerBase
 
         pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
         defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
-        brokenBytes = this.peBit.Bit(defaultBytes);
 
-        encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(defaultBytes), licenseKey);
+        brokenBytes = this.peBit.Bit(defaultBytes);
+        encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
+
         return Ok(Convert.ToBase64String(encryptedBytes));
     }
 

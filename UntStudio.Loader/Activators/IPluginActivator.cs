@@ -2,7 +2,7 @@
 
 namespace UntStudio.Loader.Activators
 {
-    public interface IPluginActivator : IActivator<Assembly>
+    public interface IPluginActivator : INativeActivator
     {
     }
 }

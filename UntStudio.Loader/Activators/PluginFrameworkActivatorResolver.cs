@@ -17,11 +17,11 @@ namespace UntStudio.Loader.Activators
 
         public IPluginActivator Resolve(Assembly assembly)
         {
-            if (assembly.GetTypes().SingleOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.RocketModInterface) != null) != null)
+            if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.RocketModInterface) != null) != null)
             {
                 return this.rocketModPluginActivator;
             }
-            else if (assembly.GetTypes().SingleOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.OpenModInterface) != null) != null)
+            else if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.OpenModInterface) != null) != null)
             {
                 return this.openModPluginActivator;
             }

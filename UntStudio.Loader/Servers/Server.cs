@@ -34,7 +34,7 @@ public sealed class Server : IServer
         {
             responseText = await webClient.DownloadStringTaskAsync(new Uri($"http://135.181.47.150/pluginSubscriptions/load?name={name}"));
             RequestResponse response = null;
-            if (responseText != null)
+            if (string.IsNullOrWhiteSpace(responseText) == false)
             {
                 if ((response = JsonConvert.DeserializeObject<RequestResponse>(responseText)) != null)
                 {
@@ -44,7 +44,7 @@ public sealed class Server : IServer
         }
         catch (JsonReaderException)
         {
-            if (responseText != null)
+            if (string.IsNullOrWhiteSpace(responseText) == false)
             {
                 return new ServerResult(Convert.FromBase64String(responseText));
             }
