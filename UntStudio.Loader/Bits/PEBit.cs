@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UntStudio.Loader.API.PortableExecutable;
 
-namespace UntStudio.Loader.Solvers
+namespace UntStudio.Loader.Bits
 {
     internal sealed class PEBit : IPEBit
     {
@@ -29,7 +29,6 @@ namespace UntStudio.Loader.Solvers
         public byte[] Unbit(byte[] bytes)
         {
             using (var stream = new MemoryStream(bytes))
-            using (var reader = new BinaryReader(stream))
             using (var writer = new BinaryWriter(stream))
             {
                 for (int i = 0; i < normalPE.Length; i++)

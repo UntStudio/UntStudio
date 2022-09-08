@@ -2,34 +2,33 @@
 using System.Reflection;
 using UntStudio.Loader.API.Activators;
 
-namespace UntStudio.Loader.Activators
+namespace UntStudio.Loader.Activators;
+
+public sealed class PluginFrameworkActivatorResolver : IPluginFrameworkActivatorResolver
 {
-    public sealed class PluginFrameworkActivatorResolver : IPluginFrameworkActivatorResolver
+    private readonly IRocketModPluginActivator rocketModPluginActivator;
+    private readonly IOpenModPluginActivator openModPluginActivator;
+
+    public PluginFrameworkActivatorResolver(IRocketModPluginActivator rocketModPluginActivator, IOpenModPluginActivator openModPluginActivator)
     {
-        private readonly IRocketModPluginActivator rocketModPluginActivator;
-        private readonly IOpenModPluginActivator openModPluginActivator;
+        this.rocketModPluginActivator = rocketModPluginActivator;
+        this.openModPluginActivator = openModPluginActivator;
+    }
 
-        public PluginFrameworkActivatorResolver(IRocketModPluginActivator rocketModPluginActivator, IOpenModPluginActivator openModPluginActivator)
+
+    public IPluginActivator Resolve(Assembly assembly)
+    {
+        if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.RocketModInterface) != null) != null)
         {
-            this.rocketModPluginActivator = rocketModPluginActivator;
-            this.openModPluginActivator = openModPluginActivator;
+            return this.rocketModPluginActivator;
         }
-
-
-        public IPluginActivator Resolve(Assembly assembly)
+        else if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.OpenModInterface) != null) != null)
         {
-            if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.RocketModInterface) != null) != null)
-            {
-                return this.rocketModPluginActivator;
-            }
-            else if (assembly.GetTypes().FirstOrDefault(t => t.GetInterface(KnownInitialPluginFrameworkTypes.OpenModInterface) != null) != null)
-            {
-                return this.openModPluginActivator;
-            }
-            else
-            {
-                throw new UnsupportedPluginFrameworkException();
-            }
+            return this.openModPluginActivator;
+        }
+        else
+        {
+            throw new UnsupportedPluginFrameworkException();
         }
     }
 }

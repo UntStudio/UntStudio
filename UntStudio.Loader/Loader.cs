@@ -12,7 +12,7 @@ using UntStudio.Loader.Decryptors;
 using UntStudio.Loader.Logging;
 using UntStudio.Loader.Servers;
 using UntStudio.Loader.Services;
-using UntStudio.Loader.Solvers;
+using UntStudio.Loader.Bits;
 
 namespace UntStudio.Loader;
 

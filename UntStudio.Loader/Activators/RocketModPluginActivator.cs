@@ -8,57 +8,56 @@ using UntStudio.Loader.API.Activators;
 using UntStudio.Loader.API.Services;
 using Object = UnityEngine.Object;
 
-namespace UntStudio.Loader.Activators
+namespace UntStudio.Loader.Activators;
+
+public sealed class RocketModPluginActivator : IRocketModPluginActivator
 {
-    public sealed class RocketModPluginActivator : IRocketModPluginActivator
+    private readonly ILogging logging;
+
+    public RocketModPluginActivator(ILogging logging)
     {
-        private readonly ILogging logging;
+        this.logging = logging;
+    }
 
-        public RocketModPluginActivator(ILogging logging)
+
+    public void Activate(IntPtr assemblyHandle, Assembly assembly)
+    {
+        GameObject containerGameObject = new GameObject();
+        MethodInfo createGameObjectMethodInfo = typeof(GameObject).GetMethod("Internal_CreateGameObject",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo addComponentMethodInfo = typeof(GameObject).GetMethod("Internal_AddComponentWithType",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        createGameObjectMethodInfo.Invoke(null, new object[]
         {
-            this.logging = logging;
+            containerGameObject,
+            string.Empty,
+        });
+
+        Type[] types = null;
+        try
+        {
+            types = assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            types = ex.Types;
         }
 
-
-        public void Activate(IntPtr assemblyHandle, Assembly assembly)
+        Type pluginType = types.FirstOrDefault(t => t.GetInterface("IRocketPlugin") != null);
+        if (pluginType == null)
         {
-            GameObject containerGameObject = new GameObject();
-            MethodInfo createGameObjectMethodInfo = typeof(GameObject).GetMethod("Internal_CreateGameObject",
-                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo addComponentMethodInfo = typeof(GameObject).GetMethod("Internal_AddComponentWithType",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-
-            createGameObjectMethodInfo.Invoke(null, new object[]
-            {
-                containerGameObject,
-                string.Empty,
-            });
-
-            Type[] types = null;
-            try
-            {
-                types = assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                types = ex.Types;
-            }
-
-            Type pluginType = types.FirstOrDefault(t => t.GetInterface("IRocketPlugin") != null);
-            if (pluginType == null)
-            {
-                logging.LogWarning($"Plugin from license server is outdated {assembly.GetName().Name}.");
-                return;
-            }
-
-            addComponentMethodInfo.Invoke(containerGameObject, new object[]
-            {
-                pluginType,
-            });
-
-            Object.DontDestroyOnLoad(containerGameObject);
-            PluginAdvertising.Get().AddPlugin(assembly.GetName().Name);
-            Events.OnLoadAssemblyRequested?.Invoke(assemblyHandle, assembly, PluginFramework.RocketMod);
+            logging.LogWarning($"Plugin from license server is outdated {assembly.GetName().Name}.");
+            return;
         }
+
+        addComponentMethodInfo.Invoke(containerGameObject, new object[]
+        {
+            pluginType,
+        });
+
+        Object.DontDestroyOnLoad(containerGameObject);
+        PluginAdvertising.Get().AddPlugin(assembly.GetName().Name);
+        Events.OnLoadAssemblyRequested?.Invoke(assemblyHandle, assembly, PluginFramework.RocketMod);
     }
 }
