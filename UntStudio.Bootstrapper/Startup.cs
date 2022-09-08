@@ -2,7 +2,6 @@
 using Rocket.Core;
 using Rocket.Core.Plugins;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
