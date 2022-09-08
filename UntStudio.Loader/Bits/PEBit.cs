@@ -5,10 +5,9 @@ namespace UntStudio.Loader.Solvers
 {
     internal sealed class PEBit : IPEBit
     {
-        // every 8bytes of pe
-        readonly ulong[] normalPE = new ulong[]
+        private readonly ulong[] normalPE = new ulong[]
         {
-            0x300905A4D, // first 8 bytes (MZ) etc
+            0x300905A4D,
             0xFFFF00000004,
             0xB8,
             0x40,
@@ -40,7 +39,7 @@ namespace UntStudio.Loader.Solvers
 
                 var numberOfRVaAndSizes = 0xF4;
                 stream.Position = numberOfRVaAndSizes;
-                writer.Write(0xA); // or 0x10
+                writer.Write(0xA);
 
                 var baseRelocSize = 0x124;
                 stream.Position = baseRelocSize;

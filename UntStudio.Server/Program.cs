@@ -22,12 +22,7 @@ builder.Services.AddDbContext<AdminsDatabaseContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdminsDatabaseConnectionString"));
 });
-/*
-builder.Services.AddLogging(configure =>
-{
-    configure.AddFile(builder.Configuration.GetSection("Logging"))
-        .AddConsole();
-});*/
+
 
 builder.Services.AddSingleton<IEncryptor, Encryptor>();
 builder.Services.AddSingleton<IPEBit, PEBit>();
@@ -35,16 +30,9 @@ builder.Services.AddSingleton<IPEBit, PEBit>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient(KnownHttpClientNames.AdminsAPI, configure =>
 {
-    //configure.BaseAddress = new Uri("http://135.181.47.150/admin/");
-    //configure.BaseAddress = new Uri("https://localhost:7192/admin/");
     configure.BaseAddress = new Uri("http://135.181.47.150/admin/");
     configure.DefaultRequestHeaders.Add(HeaderNames.UserAgent, KnownHeaders.UserAgentAdminValue);
 });
-
-/*builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.KnownProxies.Add(IPAddress.Parse("10.0.0.100"));
-});*/
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(configure =>
@@ -57,8 +45,6 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment() == false)
 {
     app.UseHttpsRedirection();
-    //app.UseExceptionHandler("/Home/Error");
-    //app.UseHsts();
 }
 
 app.UseHttpsRedirection();

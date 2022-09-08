@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
@@ -7,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UntStudio.Server.Attributes;
 using UntStudio.Server.Data;
 using UntStudio.Server.Knowns;
 using UntStudio.Server.Models;
@@ -16,7 +14,6 @@ using static UntStudio.Server.Models.AdminRequestResponse;
 
 namespace UntStudio.Server.Controllers;
 
-//[AllowUnauthenticatedHost(KnownHosts.DeployedWebsiteURL)]
 public sealed class AdminController : ControllerBase
 {
     private readonly PluginSubscriptionsDatabaseContext subscriptionsDatabase;
