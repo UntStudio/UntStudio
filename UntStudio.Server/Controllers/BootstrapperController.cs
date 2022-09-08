@@ -57,34 +57,19 @@ public sealed class BootstrapperController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
-        /*if (this.database.Data.ToList().Any(p => 
-            p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())) 
-            && p.Free))
-        {
-            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
-        }*/
-
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())
             && p.LicenseKey.Equals(p.LicenseKey)
-            && p.Free))
+            && p.Free)))
         {
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
         }
 
-        /*if (this.database.Data.ToList().Any(p =>
-            p.NotBannedOrExpired
-            && p.Key.Equals(p.Key)
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))))
-        {
-            return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
-        }*/
-
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.LicenseKey.Equals(p.LicenseKey)))
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())
+            && p.LicenseKey.Equals(p.LicenseKey))))
         {
             return Ok(Convert.ToBase64String(System.IO.File.ReadAllBytes(this.configuration["PluginsLoader:Path"])));
         }
@@ -120,19 +105,11 @@ public sealed class BootstrapperController : ControllerBase
             return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.LicenseKeyValidationFailed)));
         }
 
-        /*if (this.database.Data.ToList().Any(p =>
-            p.NotBannedOrExpired
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
-            && p.Key.Equals(p.Key)
-            && p.Free) == false)
-        {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
-        }*/
-
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())
             && p.LicenseKey.Equals(p.LicenseKey)
-            && p.Free))
+            && p.Free)))
         {
             return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
             (
@@ -142,17 +119,10 @@ public sealed class BootstrapperController : ControllerBase
             );
         }
 
-        /*if (this.database.Data.ToList().Any(p =>
-            p.NotBannedOrExpired
-            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress))
-            && p.Key.Equals(p.Key)) == false)
-        {
-            return Content(JsonConvert.SerializeObject(new RequestResponse(CodeResponse.SubscriptionBannedOrIPNotBindedOrExpiredOrSpecifiedKeyNotFound)));
-        }*/
-
         if (this.database.Data.ToList().Any(p =>
             p.NotBannedOrExpired
-            && p.LicenseKey.Equals(p.LicenseKey)))
+            && p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString())
+            && p.LicenseKey.Equals(p.LicenseKey))))
         {
             return Ok(JsonConvert.SerializeObject(new LoaderEntryPoint
             (
