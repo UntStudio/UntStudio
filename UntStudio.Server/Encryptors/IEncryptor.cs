@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace UntStudio.Server.Encryptors
+namespace UntStudio.Server.Encryptors;
+
+public interface IEncryptor
 {
-    public interface IEncryptor
-    {
-        Task<byte[]> EncryptContentAsync(string text, string key);
-    }
+    Task<byte[]> EncryptContentAsync(string text, string key);
 }

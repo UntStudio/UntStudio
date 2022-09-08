@@ -1,7 +1,6 @@
-﻿namespace UntStudio.Server.Strings
+﻿namespace UntStudio.Server.Strings;
+
+public static class StringValidatorExtension
 {
-    public static class StringValidatorExtension
-    {
-        public static IStringValidator Rules(this string source) => new StringValidator(source);
-    }
+    public static IStringValidator Rules(this string source) => new StringValidator(source);
 }

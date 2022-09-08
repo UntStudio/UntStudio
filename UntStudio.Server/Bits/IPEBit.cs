@@ -1,7 +1,6 @@
-﻿namespace UntStudio.Server.Bits
+﻿namespace UntStudio.Server.Bits;
+
+public interface IPEBit
 {
-    public interface IPEBit
-    {
-        byte[] Bit(byte[] bytes);
-    }
+    byte[] Bit(byte[] bytes);
 }

@@ -1,25 +1,24 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace UntStudio.Server.Controllers
+namespace UntStudio.Server.Controllers;
+
+[Authorize]
+public sealed class AdminsController : Controller
 {
-	[Authorize]
-    public sealed class AdminsController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        public IActionResult Menu()
-        {
-            return View();
-        }
+    public IActionResult Menu()
+    {
+        return View();
+    }
 
-        [HttpGet("profile")]
-        public IActionResult Profile()
-        {
-            return View();
-        }
+    [HttpGet("profile")]
+    public IActionResult Profile()
+    {
+        return View();
     }
 }

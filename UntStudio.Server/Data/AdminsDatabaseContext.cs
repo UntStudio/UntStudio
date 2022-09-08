@@ -8,8 +8,6 @@ public sealed class AdminsDatabaseContext : DbContext
     public AdminsDatabaseContext(DbContextOptions<AdminsDatabaseContext> options) : base(options)
     {
         Database.EnsureCreated();
-        /*Data.Add(new Admin("admin", "admin"));
-        SaveChanges();*/
     }
 
 
