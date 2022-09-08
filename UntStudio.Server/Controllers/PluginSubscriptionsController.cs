@@ -73,14 +73,12 @@ public sealed class PluginSubscriptionsController : ControllerBase
         }
 
         string pluginFile = null;
-        byte[] defaultBytes = null;
-        byte[] encryptedBytes = null;
+        byte[] bytes = null;
         PluginSubscription freePlugin = this.database.Data.ToList().FirstOrDefault(p =>
             p.LicenseKey.Equals(licenseKey)
             //&& p.AllowedAddressesParsed.Any(a => a.Equals(ControllerContext.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()))
             && p.Name.Equals(name)
             && p.Free);
-        byte[] brokenBytes = null;
         if (freePlugin != null)
         {
             if (freePlugin.Banned)
@@ -99,11 +97,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
             }
 
             pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-            defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+            bytes = System.IO.File.ReadAllBytes(pluginFile);
             //brokenBytes = this.peBit.Bit(defaultBytes);
 
             //encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
-            return Ok(Convert.ToBase64String(defaultBytes));
+            return Ok(Convert.ToBase64String(bytes));
         }
 
         PluginSubscription plugin = this.database.Data.ToList().FirstOrDefault(p =>
@@ -131,12 +129,11 @@ public sealed class PluginSubscriptionsController : ControllerBase
         }
 
         pluginFile = Path.Combine(this.configuration["PluginsDirectory:Path"], string.Concat(name, ".dll"));
-        defaultBytes = System.IO.File.ReadAllBytes(pluginFile);
+        bytes = System.IO.File.ReadAllBytes(pluginFile);
+        bytes = this.peBit.Bit(bytes);
+        bytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(bytes), licenseKey);
 
-        brokenBytes = this.peBit.Bit(defaultBytes);
-        encryptedBytes = await this.encryptor.EncryptContentAsync(Convert.ToBase64String(brokenBytes), licenseKey);
-
-        return Ok(Convert.ToBase64String(encryptedBytes));
+        return Ok(Convert.ToBase64String(bytes));
     }
 
     /*public IActionResult Block(string name)

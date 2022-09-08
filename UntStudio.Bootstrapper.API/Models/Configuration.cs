@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace UntStudio.Bootstrapper.Models
+namespace UntStudio.API.Bootstrapper.Models
 {
-    internal class Configuration
+    public class Configuration
     {
         public string LicenseKey;
 

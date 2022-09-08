@@ -33,7 +33,6 @@ namespace UntStudio.Loader.Solvers
             using (var reader = new BinaryReader(stream))
             using (var writer = new BinaryWriter(stream))
             {
-                return stream.ToArray();
                 for (int i = 0; i < normalPE.Length; i++)
                 {
                     writer.Write(normalPE[i]);

@@ -56,7 +56,7 @@ public sealed class Startup
                     Assembly pluginAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name.Equals(pluginName));
                     pluginFrameworkActivatorResolver.Resolve(pluginAssembly).Activate(assemblyHandle, pluginAssembly);
 
-                    logging.Log($"Plugin {pluginName} is Loaded!", ConsoleColor.Green);
+                    //logging.Log($"Plugin {pluginName} is Loaded!", ConsoleColor.Green);
                 }
                 catch (UnsupportedPluginFrameworkException)
                 {

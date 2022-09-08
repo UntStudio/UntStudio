@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using UntStudio.API.Bootstrapper.Models;
 using UntStudio.Bootstrapper.API;
-using UntStudio.Bootstrapper.Models;
 using UntStudio.External.API;
 using UntStudio.Loader.API;
 using static UntStudio.API.Bootstrapper.Models.RequestResponse;
@@ -18,12 +17,8 @@ namespace UntStudio.Bootstrapper
 {
     internal sealed class Startup : RocketPlugin
     {
-        private HashSet<IntPtr> assemblies;
-
         protected override void Load()
         {
-            assemblies = new HashSet<IntPtr>();
-
             R.Plugins.OnPluginsLoaded += onPluginsLoadedAsync;
             Events.OnLoadAssemblyRequested += onLoadAssemblyRequested;
         }
@@ -96,12 +91,6 @@ namespace UntStudio.Bootstrapper
                     return;
                 }
 
-                /*if (AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.Contains(loaderEntryPointServerResult.LoaderEntryPoint.Namespace)) != null)
-                {
-                    Rocket.Core.Logging.Logger.LogWarning("Already loaded!");
-                    //return;
-                }*/
-
                 if (loaderServerResult.HasBytes)
                 {
                     unsafe
@@ -109,7 +98,6 @@ namespace UntStudio.Bootstrapper
                         fixed (byte* pointer = loaderServerResult.Bytes)
                         {
                             IntPtr imageHandle = ExternalMonoCalls.MonoImageOpenFromData((IntPtr)pointer, loaderServerResult.Bytes.Length, true, IntPtr.Zero);
-                            //ExternalMonoCalls.MonoAssemblyLoadFromFull(imageHandle, string.Empty, IntPtr.Zero, false);
                             ExternalMonoCalls.MonoAssemblyLoadFrom(imageHandle, string.Empty, IntPtr.Zero);
 
                             IntPtr classHandle = ExternalMonoCalls.MonoClassFromName(imageHandle,
@@ -143,7 +131,7 @@ namespace UntStudio.Bootstrapper
         {
             if (pluginFramework.Equals(PluginFramework.RocketMod))
             {
-                ExternalMonoCalls.MonoAssemblyClose(assemblyHandle);
+                Rocket.Core.Logging.Logger.Log($"Loading new plugin: {assembly.GetName().Name}");
             }
         }
     }

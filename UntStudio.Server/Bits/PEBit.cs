@@ -10,7 +10,6 @@ namespace UntStudio.Server.Bits
             using (var reader = new BinaryReader(stream))
             using (var writer = new BinaryWriter(stream))
             {
-                return stream.ToArray();
                 int peLenght = 33;
                 for (int i = 0; i < peLenght; i++)
                 {
